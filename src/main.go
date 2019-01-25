@@ -23,6 +23,4 @@ func main(){
 	code := filereader.ReadFile(filename)
 	commands := lexer.Lex(code)
 	root := parser.Parse(commands)
-
-	fmt.Println(root)
 }
