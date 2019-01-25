@@ -1,0 +1,47 @@
+# declare extern variable (optional, if you want to modify the program response)
+extern RETURN_CODE
+# Persephone exposes many extern variables like the pc or other runtime information
+
+dci32 0 # declare int32 constant
+dci32 1 # declare int32 constant
+dci32 10000 # declare int32 constant
+dci8 0 # declare int8 constant
+
+v_int32 var_01 # declare int32 variable
+v_int32 var_02 # declare int32 variable
+
+ldi32c 0 # load 0th constant onto stack
+store var_01 # initialize var_01 with 0
+
+ldi32c 1 # load constant of index 1 onto stack
+store var_02 # initialize var_02 with 1
+
+loop:
+ldi32v var_01 # load int32 variable onto stack
+ldi32c 2 # load constant of index 2 onto stack
+jmple fib # jump to fib if var_01 is smaller or equal to 10000
+jmp exit
+
+fib:
+
+ldi32v var_01 # load var_01 onto stack
+ldi32v var_02 # load var_02 onto stack
+add # add and put result onto stack
+store var_01 # store top stack value into var_01
+
+ldi32v var_01
+ldi32v var_02
+add
+store var_02
+
+ldi32v var_01
+call 0x01 # print var_01
+
+ldi32v var_02
+call 0x01 # print var_02
+
+jmp loop
+
+exit: # exit program
+ldi8c 4
+store RETURN_CODE

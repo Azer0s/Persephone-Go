@@ -10,6 +10,7 @@ const(
 	Pointer Kind = "pointer"
 	Lbrace Kind = "lbrace"
 	Rbrace Kind = "rbrace"
+	Label Kind = "label"
 )
 
 type Token struct {
@@ -20,6 +21,7 @@ type Token struct {
 type Root struct{
 	Functions []Function
 	Commands []Command
+	Labels map[string]int
 }
 
 type Function struct{

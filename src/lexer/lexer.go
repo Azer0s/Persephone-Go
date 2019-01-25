@@ -15,6 +15,10 @@ func consume(){
 	index++
 }
 
+func discard()  {
+	index++
+}
+
 func letter() string{
 	return string(code[index])
 }
@@ -41,6 +45,11 @@ func Lex(lines []string) (tokens []types.Token){
 			}
 
 			current.Kind = types.Name
+
+			if letter() == ":" {
+				current.Kind = types.Label
+				discard()
+			}
 		}else if isNumber.MatchString(letter()) {
 			consume()
 
