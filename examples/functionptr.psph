@@ -1,0 +1,16 @@
+dcsa "Hello world"
+
+print {
+    v_dyn to_print
+    store to_print # store value from stack into temporary variable
+
+    lddyn to_print
+    call 0x01
+}
+
+v_ptr print_ptr
+ldptr print # loads the function ptr
+store print_ptr
+
+ldsac 0
+call [print_ptr] # calls the function at the address of print_ptr
