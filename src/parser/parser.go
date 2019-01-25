@@ -20,12 +20,27 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func parseStatement() (command types.Command){
+func parseStatement(function bool) (command types.Command){
 	if tokens[index].Kind == types.Name {
-		if contains(noArgCommands,tokens[index].Text) {
+
+		hasNoArgsCommands := contains(noArgCommands,tokens[index].Text)
+		hasFunctionCommands := contains(functionCommands,tokens[index].Text)
+
+		if hasNoArgsCommands || hasFunctionCommands {
 			command.Single = true
 			command.Command = tokens[index]
-			return
+			if hasNoArgsCommands {
+				return
+			}
+
+			if hasFunctionCommands {
+				if function {
+					return
+				}else {
+					fmt.Println("put or ret can only be used in functions!")
+					return types.Command{}
+				}
+			}
 		}
 
 		command.Single = false
@@ -57,13 +72,13 @@ func Parse (tks []types.Token) (root types.Root){
 			index++
 
 			for tokens[index].Kind != types.Rbrace {
-				fn.Commands = append(fn.Commands, parseStatement())
+				fn.Commands = append(fn.Commands, parseStatement(true))
 				index++
 			}
 
 			root.Functions = append(root.Functions, fn)
 		}else{
-			root.Commands = append(root.Commands, parseStatement())
+			root.Commands = append(root.Commands, parseStatement(false))
 		}
 	}
 
