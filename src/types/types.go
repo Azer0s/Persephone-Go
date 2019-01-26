@@ -7,6 +7,7 @@ const(
 	Number Kind = "number"
 	String Kind = "string"
 	HexNumber Kind = "hexnum"
+	Float Kind = "float"
 	Pointer Kind = "pointer"
 	Lbrace Kind = "lbrace"
 	Rbrace Kind = "rbrace"

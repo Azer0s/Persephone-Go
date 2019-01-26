@@ -47,11 +47,11 @@ func parseStatement(function bool) (command types.Command){
 		command.Command = tokens[index]
 		index++
 
-		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer {
+		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer {
 			command.Param = tokens[index]
 			return
 		}else{
-			fmt.Println("Expected name, number, hexnumber, string or pointer, got: " + tokens[index].Kind)
+			fmt.Println("Expected name, number, hexnumber, flaot, string or pointer, got: " + tokens[index].Kind)
 			return types.Command{}
 		}
 	}else {

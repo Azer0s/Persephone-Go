@@ -63,6 +63,18 @@ func Lex(lines []string) (tokens []types.Token){
 			for isNumber.MatchString(letter()){
 				consume()
 			}
+
+			if letter() == "." {
+				if current.Kind == types.HexNumber {
+					fmt.Println("Hexnumber can't have a decimal point!")
+					return nil
+				}
+				consume()
+				current.Kind = types.Float
+				for isNumber.MatchString(letter()){
+					consume()
+				}
+			}
 		}else if letter() == "{"{
 			current.Kind = types.Lbrace
 			current.Text = "{"
