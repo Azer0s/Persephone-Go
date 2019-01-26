@@ -9,6 +9,8 @@ const(
 	Div Op = 0x2
 	Mul Op = 0x3
 	Mod Op = 0x4
+	Shl Op = 0x5
+	Shr Op = 0x6
 )
 
 const(

@@ -68,6 +68,15 @@ func intOp(s stack, op datatypes.Op) stack{
 		result = left / right
 	case datatypes.Mod:
 		result = left % right
+	case datatypes.Shr, datatypes.Shl:
+		leftu := uint64(left)
+		rightu := uint64(right)
+
+		if op == datatypes.Shl {
+			result = int64(leftu << rightu)
+		}else {
+			result = int64(leftu >> rightu)
+		}
 	}
 
 	switch min {
@@ -178,6 +187,10 @@ func Run (root types.Root){
 			switch root.Commands[e].Command.Text {
 			case "pop":
 				s,_ = s.Pop()
+
+			/*
+			Arithmetic int operations
+			 */
 			case "add":
 				s = intOp(s, datatypes.Add)
 			case "sub":
@@ -188,7 +201,14 @@ func Run (root types.Root){
 				s = intOp(s, datatypes.Div)
 			case "mod":
 				s = intOp(s, datatypes.Mod)
+			case "shl":
+				s = intOp(s, datatypes.Shl)
+			case "shr":
+				s = intOp(s, datatypes.Shr)
 
+			/*
+			Arithmetic float operations
+			 */
 			case "addf":
 				s = floatOp(s, datatypes.Add)
 			case "subf":
@@ -200,21 +220,24 @@ func Run (root types.Root){
 			}
 		}else{
 			switch root.Commands[e].Command.Text {
+			/*
+			Declare int constant
+			 */
 			case "dci8":
 				c = declareIntConst(root.Commands[e], c, datatypes.Int8)
 			case "dci16":
 				c = declareIntConst(root.Commands[e], c, datatypes.Int16)
-			case "dci":
-			case "dci32":
+			case "dci32","dci":
 				c = declareIntConst(root.Commands[e], c, datatypes.Int32)
 			case "dci64":
 				c = declareIntConst(root.Commands[e], c, datatypes.Int64)
 
-			case "dcf":
-			case "dcf32":
+			/*
+			Declare float constant
+			 */
+			case "dcf32","dcf":
 				c = declareFloatConst(root.Commands[e], c, datatypes.Float32)
-			case "dcd":
-			case "dcf64":
+			case "dcf64","dcd":
 				c = declareFloatConst(root.Commands[e], c, datatypes.Float64)
 			}
 		}
