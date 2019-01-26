@@ -3,7 +3,9 @@ package runtime
 import (
 	"../datatypes"
 	"../types"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 type stack []datatypes.Data
@@ -178,9 +180,41 @@ func declareFloatConst(command types.Command, c []datatypes.Data, d datatypes.Da
 	return c
 }
 
+func declareStringConstant(command types.Command, c []datatypes.Data) []datatypes.Data{
+	val := strings.Trim(command.Param.Text,"\"")
+	var stringtype datatypes.DataType
+
+	if command.Command.Text == "dcsa"  {
+		stringtype = datatypes.String_ASCII
+	}else {
+		stringtype = datatypes.String_Unicode
+	}
+
+	c = append(c, datatypes.Data{Value:val,Type:stringtype})
+	return c
+}
+
+func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.Data{
+	val := false
+
+	switch command.Param.Text {
+	case "0":
+		val = false
+	case "1":
+		val = true
+	default:
+		fmt.Println("Error, expected a bit value, received: " + command.Param.Text + "!")
+		return nil
+	}
+
+	c = append(c, datatypes.Data{Value:val, Type:datatypes.Bit})
+	return c
+}
+
 func Run (root types.Root){
 	s := make(stack,0)
 	c := []datatypes.Data{}
+	//v := make(map[string]datatypes.Data)
 
 	for e := range root.Commands {
 		if root.Commands[e].Single {
@@ -239,6 +273,25 @@ func Run (root types.Root){
 				c = declareFloatConst(root.Commands[e], c, datatypes.Float32)
 			case "dcf64","dcd":
 				c = declareFloatConst(root.Commands[e], c, datatypes.Float64)
+
+			/*
+			Declare string constant
+			This implementation of Persephone doesn't differentiate between ASCII and Unicode
+			 */
+			case "dcsa","dcsu":
+				c = declareStringConstant(root.Commands[e], c)
+
+			/*
+			Declare bit constant
+			 */
+			case "dcb":
+				c = declareBitConstant(root.Commands[e], c)
+
+			/*
+			Variable creation
+			 */
+			case "":
+
 			}
 		}
 	}

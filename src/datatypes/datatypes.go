@@ -14,6 +14,8 @@ const(
 )
 
 const(
+	Bit DataType = 0x01
+
 	Int8 DataType = 0x08
 	Int16 DataType = 0x16
 	Int32 DataType = 0x32
@@ -21,6 +23,9 @@ const(
 
 	Float32 DataType = 0x132
 	Float64 DataType = 0x164
+
+	String_ASCII DataType = 0x201
+	String_Unicode DataType = 0x202
 )
 
 type Data struct {
