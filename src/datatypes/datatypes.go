@@ -14,7 +14,9 @@ const(
 )
 
 const(
+	Dyn DataType = 0x00
 	Bit DataType = 0x01
+	Ptr DataType = 0x02
 
 	Int8 DataType = 0x08
 	Int16 DataType = 0x16

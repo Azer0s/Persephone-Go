@@ -19,6 +19,10 @@ func (s stack) Pop() (stack, datatypes.Data) {
 	return  s[:l-1], s[l-1]
 }
 
+/*
+Arithmetic operations
+ */
+
 func intOp(s stack, op datatypes.Op) stack{
 	var a1 datatypes.Data
 	var a2 datatypes.Data
@@ -32,10 +36,16 @@ func intOp(s stack, op datatypes.Op) stack{
 		min = a2.Type
 	}
 
+	if min == datatypes.Ptr {
+		min = datatypes.Int32
+	}
+
 	var left int64
 	var right int64
 
 	switch a1.Type {
+	case datatypes.Ptr:
+		left = int64(a1.Value.(int32))
 	case datatypes.Int8:
 		left = int64(a1.Value.(int8))
 	case datatypes.Int16:
@@ -47,6 +57,8 @@ func intOp(s stack, op datatypes.Op) stack{
 	}
 
 	switch a2.Type {
+	case datatypes.Ptr:
+		right = int64(a2.Value.(int32))
 	case datatypes.Int8:
 		right = int64(a2.Value.(int8))
 	case datatypes.Int16:
@@ -148,6 +160,10 @@ func floatOp(s stack, op datatypes.Op) stack{
 	return s
 }
 
+/*
+Constant declarations
+ */
+
 func declareIntConst(command types.Command, c []datatypes.Data, d datatypes.DataType) []datatypes.Data{
 	var num int64
 	num,_ = strconv.ParseInt(command.Param.Text,0,64)
@@ -211,10 +227,43 @@ func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.D
 	return c
 }
 
+/*
+Variable declaration
+ */
+func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data{
+
+	switch d {
+	case datatypes.Dyn:
+		v[command.Param.Text] = datatypes.Data{Value:datatypes.Data{Value:int32(0),Type:datatypes.Int32},Type:datatypes.Dyn}
+	case datatypes.Bit:
+		v[command.Param.Text] = datatypes.Data{Value:false,Type:datatypes.Bit}
+	case datatypes.Ptr:
+		v[command.Param.Text] = datatypes.Data{Value:int32(0x0),Type:datatypes.Ptr}
+	case datatypes.Int8:
+		v[command.Param.Text] = datatypes.Data{Value:int8(0),Type:datatypes.Int8}
+	case datatypes.Int16:
+		v[command.Param.Text] = datatypes.Data{Value:int16(0),Type:datatypes.Int16}
+	case datatypes.Int32:
+		v[command.Param.Text] = datatypes.Data{Value:int32(0),Type:datatypes.Int32}
+	case datatypes.Int64:
+		v[command.Param.Text] = datatypes.Data{Value:int64(0),Type:datatypes.Int64}
+	case datatypes.Float32:
+		v[command.Param.Text] = datatypes.Data{Value:float32(0),Type:datatypes.Float32}
+	case datatypes.Float64:
+		v[command.Param.Text] = datatypes.Data{Value:float64(0),Type:datatypes.Float64}
+	case datatypes.String_ASCII:
+		v[command.Param.Text] = datatypes.Data{Value:"",Type:datatypes.String_ASCII}
+	case datatypes.String_Unicode:
+		v[command.Param.Text] = datatypes.Data{Value:"",Type:datatypes.String_Unicode}
+	}
+
+	return v
+}
+
 func Run (root types.Root){
 	s := make(stack,0)
 	c := []datatypes.Data{}
-	//v := make(map[string]datatypes.Data)
+	v := make(map[string]datatypes.Data)
 
 	for e := range root.Commands {
 		if root.Commands[e].Single {
@@ -290,8 +339,28 @@ func Run (root types.Root){
 			/*
 			Variable creation
 			 */
-			case "":
-
+			case "v_int8":
+				v = declareVar(root.Commands[e], datatypes.Int8, v)
+			case "v_int16":
+				v = declareVar(root.Commands[e], datatypes.Int16, v)
+			case "v_int32", "v_int":
+				v = declareVar(root.Commands[e], datatypes.Int32, v)
+			case "v_int64":
+				v = declareVar(root.Commands[e], datatypes.Int64, v)
+			case "v_float32", "v_float":
+				v = declareVar(root.Commands[e], datatypes.Float32, v)
+			case "v_float64", "v_double":
+				v = declareVar(root.Commands[e], datatypes.Float64, v)
+			case "v_stringa":
+				v = declareVar(root.Commands[e], datatypes.String_ASCII, v)
+			case "v_stringu":
+				v = declareVar(root.Commands[e], datatypes.String_Unicode, v)
+			case "v_bit":
+				v = declareVar(root.Commands[e], datatypes.Bit, v)
+			case "v_dyn":
+				v = declareVar(root.Commands[e], datatypes.Dyn, v)
+			case "v_ptr":
+				v = declareVar(root.Commands[e], datatypes.Ptr, v)
 			}
 		}
 	}

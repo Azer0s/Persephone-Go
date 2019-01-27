@@ -1,0 +1,5 @@
+dci32 4
+dci32 16
+
+v_int32 var_01
+v_dyn var_dyn
