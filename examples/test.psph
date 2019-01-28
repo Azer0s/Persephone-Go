@@ -6,3 +6,7 @@ ldi32c 1
 add
 
 call 0x01
+
+dcsa "Hello world"
+ldsac 2
+call 0x01

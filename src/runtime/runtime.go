@@ -100,8 +100,8 @@ func intOp(s stack, op types.Op) stack{
 	var a1 datatypes.Data
 	var a2 datatypes.Data
 
-	s,a1 = s.Pop()
 	s,a2 = s.Pop()
+	s,a1 = s.Pop()
 
 	if !(a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Int64 && a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Int64) {
 		fmt.Println("Only int or ptr allowed in int operations!")
@@ -195,8 +195,8 @@ func floatOp(s stack, op types.Op) stack{
 	var a1 datatypes.Data
 	var a2 datatypes.Data
 
-	s,a1 = s.Pop()
 	s,a2 = s.Pop()
+	s,a1 = s.Pop()
 
 	if !(a1.Type >= datatypes.Float32 && a1.Type <= datatypes.Float64 && a2.Type >= datatypes.Float32 && a2.Type <= datatypes.Float64) {
 		fmt.Println("Only float allowed in float operations!")

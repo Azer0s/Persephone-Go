@@ -5,6 +5,7 @@ v_int32 var_01
 
 ldi32c 1
 store var_01
+
 ldi32v var_01
 ldi32c 0
 shl # left shift var_01 (16) by 4
