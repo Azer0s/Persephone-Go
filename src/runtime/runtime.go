@@ -68,7 +68,7 @@ func getInt64(data datatypes.Data) int64{
 	}
 }
 
-func intOp(s stack, op datatypes.Op) stack{
+func intOp(s stack, op types.Op) stack{
 	var a1 datatypes.Data
 	var a2 datatypes.Data
 
@@ -102,30 +102,30 @@ func intOp(s stack, op datatypes.Op) stack{
 	var result int64
 
 	switch op {
-	case datatypes.Add:
+	case types.Add:
 		result = left + right
-	case datatypes.Sub:
+	case types.Sub:
 		result = left - right
-	case datatypes.Mul:
+	case types.Mul:
 		result = left * right
-	case datatypes.Div:
+	case types.Div:
 		result = left / right
-	case datatypes.Mod:
+	case types.Mod:
 		result = left % right
-	case datatypes.Shr, datatypes.Shl:
+	case types.Shr, types.Shl:
 		leftu := uint64(left)
 		rightu := uint64(right)
 
-		if op == datatypes.Shl {
+		if op == types.Shl {
 			result = int64(leftu << rightu)
 		}else {
 			result = int64(leftu >> rightu)
 		}
-	case datatypes.And:
+	case types.And:
 		result = left & right
-	case datatypes.Or:
+	case types.Or:
 		result = left | right
-	case datatypes.Xor:
+	case types.Xor:
 		result = left ^ right
 	}
 
@@ -163,7 +163,7 @@ func getFloat64(data datatypes.Data) float64{
 	}
 }
 
-func floatOp(s stack, op datatypes.Op) stack{
+func floatOp(s stack, op types.Op) stack{
 	var a1 datatypes.Data
 	var a2 datatypes.Data
 
@@ -187,13 +187,13 @@ func floatOp(s stack, op datatypes.Op) stack{
 	var result float64
 
 	switch op {
-	case datatypes.Add:
+	case types.Add:
 		result = left + right
-	case datatypes.Sub:
+	case types.Sub:
 		result = left - right
-	case datatypes.Mul:
+	case types.Mul:
 		result = left * right
-	case datatypes.Div:
+	case types.Div:
 		result = left / right
 	}
 
@@ -299,7 +299,7 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 }
 
 /*
-Load on stack
+Load value on stack
  */
 
 func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack{
@@ -325,6 +325,49 @@ func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes
 	return nil
 }
 
+func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, s stack) stack{
+	index,_ := strconv.Atoi(command.Param.Text)
+	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && c[index].Type >= datatypes.String_ASCII && c[index].Type <= datatypes.String_Unicode {
+		s = s.Push(c[index])
+		return s
+	}
+
+	if d >= datatypes.Float32 && d <= datatypes.Float64 && c[index].Type >= datatypes.Float32 && c[index].Type <= datatypes.Float64 {
+		return pushFloatVar(getFloat64(c[index]), d, s)
+	}
+
+	if d >= datatypes.Ptr && d <= datatypes.Int64 && c[index].Type >= datatypes.Ptr && c[index].Type <= datatypes.Int64 {
+		return pushIntVar(getInt64(c[index]), d, s)
+	}
+
+	if d == datatypes.Bit && c[index].Type == datatypes.Bit {
+		s = s.Push(c[index])
+		return s
+	}
+
+	fmt.Println("Type mismatch!")
+	return nil
+}
+
+/*
+Call
+ */
+
+func call(command types.Command, s stack) stack{
+	var num int64
+	num,_ = strconv.ParseInt(command.Param.Text,0,8)
+
+	var v datatypes.Data
+	s,v = s.Pop()
+
+	switch types.Op(num) {
+	case types.Print:
+		fmt.Println(v.Value)
+	}
+
+	return s
+}
+
 func Run (root types.Root){
 	s := make(stack,0)
 	var c []datatypes.Data
@@ -340,42 +383,48 @@ func Run (root types.Root){
 			Arithmetic int operations
 			 */
 			case "add":
-				s = intOp(s, datatypes.Add)
+				s = intOp(s, types.Add)
 			case "sub":
-				s = intOp(s, datatypes.Sub)
+				s = intOp(s, types.Sub)
 			case "mul":
-				s = intOp(s, datatypes.Mul)
+				s = intOp(s, types.Mul)
 			case "div":
-				s = intOp(s, datatypes.Div)
+				s = intOp(s, types.Div)
 			case "mod":
-				s = intOp(s, datatypes.Mod)
+				s = intOp(s, types.Mod)
 			case "andi":
-				s = intOp(s, datatypes.And)
+				s = intOp(s, types.And)
 			case "ori":
-				s = intOp(s, datatypes.Or)
+				s = intOp(s, types.Or)
 			case "xori":
-				s = intOp(s, datatypes.Xor)
+				s = intOp(s, types.Xor)
 			case "noti":
 				s = negateInt(s)
 			case "shl":
-				s = intOp(s, datatypes.Shl)
+				s = intOp(s, types.Shl)
 			case "shr":
-				s = intOp(s, datatypes.Shr)
+				s = intOp(s, types.Shr)
 
 			/*
 			Arithmetic float operations
 			 */
 			case "addf":
-				s = floatOp(s, datatypes.Add)
+				s = floatOp(s, types.Add)
 			case "subf":
-				s = floatOp(s, datatypes.Sub)
+				s = floatOp(s, types.Sub)
 			case "mulf":
-				s = floatOp(s, datatypes.Mul)
+				s = floatOp(s, types.Mul)
 			case "divf":
-				s = floatOp(s, datatypes.Div)
+				s = floatOp(s, types.Div)
 			}
 		}else{
 			switch root.Commands[e].Command.Text {
+			/*
+			Call
+			 */
+			case "call":
+				s = call(root.Commands[e], s)
+
 			/*
 			Declare int constant
 			 */
@@ -456,6 +505,28 @@ func Run (root types.Root){
 				s = loadVar(root.Commands[e], datatypes.Bit, v, s)
 			case "ldptrv":
 				s = loadVar(root.Commands[e], datatypes.Ptr, v, s)
+
+			/*
+			Load constant onto stack
+			 */
+			case "ldi8c":
+				s = loadConst(root.Commands[e], datatypes.Int8, c, s)
+			case "ldi16c":
+				s = loadConst(root.Commands[e], datatypes.Int16, c, s)
+			case "ldi32c", "ldic":
+				s = loadConst(root.Commands[e], datatypes.Int32, c, s)
+			case "ldi64c":
+				s = loadConst(root.Commands[e], datatypes.Int64, c, s)
+			case "ldf32c", "ldfc":
+				s = loadConst(root.Commands[e], datatypes.Float32, c, s)
+			case "ldf64c", "lddc":
+				s = loadConst(root.Commands[e], datatypes.Float64, c, s)
+			case "ldsac":
+				s = loadConst(root.Commands[e], datatypes.String_ASCII, c, s)
+			case "ldsuc":
+				s = loadConst(root.Commands[e], datatypes.String_Unicode, c, s)
+			case "ldbc":
+				s = loadConst(root.Commands[e], datatypes.Bit, c, s)
 			}
 		}
 	}

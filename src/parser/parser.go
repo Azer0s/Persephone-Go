@@ -60,13 +60,21 @@ func parseStatement(function bool) (command types.Command){
 	}
 }
 
+func getNextToken() types.Token{
+	if len(tokens) == index+1 {
+		return types.Token{Kind:types.Unknown,Text:""}
+	}else{
+		return tokens[index+1]
+	}
+}
+
 func Parse (tks []types.Token) (root types.Root){
 	tokens = tks
 	index = 0
 	root.Labels = make(map[string]int)
 
 	for index = 0; index < len(tokens); index++{
-		if tokens[index].Kind == types.Name && tokens[index+1].Kind == types.Lbrace {
+		if tokens[index].Kind == types.Name && getNextToken().Kind == types.Lbrace {
 			fn := types.Function{}
 			fn.Name = tokens[index]
 			index++
