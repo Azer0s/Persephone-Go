@@ -22,6 +22,7 @@ func (s stack) Pop() (stack, datatypes.Data) {
 /*
 Arithmetic operations
  */
+
 func getInt64(data datatypes.Data) int64{
 	switch data.Type {
 	case datatypes.Ptr:
@@ -57,8 +58,14 @@ func intOp(s stack, op datatypes.Op) stack{
 		min = a2.Type
 	}
 
+
 	if min == datatypes.Ptr {
 		min = datatypes.Int32
+	}
+
+	isPtr := false
+	if a1.Type == datatypes.Ptr || a2.Type == datatypes.Ptr {
+		isPtr = true
 	}
 
 	left := getInt64(a1)
@@ -94,6 +101,11 @@ func intOp(s stack, op datatypes.Op) stack{
 		result = left ^ right
 	}
 
+	if isPtr {
+		s = s.Push(datatypes.Data{Value:int32(result),Type:datatypes.Ptr})
+		return s
+	}
+
 	switch min {
 	case datatypes.Int8:
 		s = s.Push(datatypes.Data{Value:int8(result),Type:datatypes.Int8})
@@ -103,6 +115,32 @@ func intOp(s stack, op datatypes.Op) stack{
 		s = s.Push(datatypes.Data{Value:int32(result),Type:datatypes.Int32})
 	case datatypes.Int64:
 		s = s.Push(datatypes.Data{Value:int64(result),Type:datatypes.Int64})
+	}
+
+	return s
+}
+
+func negateInt(s stack) stack{
+	var op datatypes.Data
+	s, op = s.Pop()
+
+	if !(op.Type >= datatypes.Int8 && op.Type <= datatypes.Int64) {
+		fmt.Println("Only int or bit allowed in negate operation!")
+		return nil
+	}
+
+	opInt := getInt64(op)
+	opInt = ^opInt
+
+	switch op.Type {
+	case datatypes.Int8:
+		s = s.Push(datatypes.Data{Value:int8(opInt),Type:datatypes.Int8})
+	case datatypes.Int16:
+		s = s.Push(datatypes.Data{Value:int16(opInt),Type:datatypes.Int16})
+	case datatypes.Int32:
+		s = s.Push(datatypes.Data{Value:int32(opInt),Type:datatypes.Int32})
+	case datatypes.Int64:
+		s = s.Push(datatypes.Data{Value:int64(opInt),Type:datatypes.Int64})
 	}
 
 	return s
@@ -233,6 +271,7 @@ func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.D
 /*
 Variable declaration
  */
+ 
 func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data{
 
 	switch d {
@@ -292,7 +331,7 @@ func Run (root types.Root){
 			case "xori":
 				s = intOp(s, datatypes.Xor)
 			case "noti":
-				//TODO
+				s = negateInt(s)
 			case "shl":
 				s = intOp(s, datatypes.Shl)
 			case "shr":
