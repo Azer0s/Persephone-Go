@@ -1,6 +1,12 @@
 dci32 4
 dci32 16
 
+v_int32 var0
+v_int32 var1
+v_int32 var2
+v_int32 var3
+v_int32 var4
+
 ldi32c 0
 ldi32c 1
 add
