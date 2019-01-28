@@ -263,7 +263,7 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 
 func Run (root types.Root){
 	s := make(stack,0)
-	c := []datatypes.Data{}
+	var c []datatypes.Data
 	v := make(map[string]datatypes.Data)
 
 	for e := range root.Commands {
