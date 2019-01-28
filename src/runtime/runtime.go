@@ -675,6 +675,8 @@ func Run (root types.Root) int8 {
 				s = loadConst(root.Commands[e], datatypes.String_Unicode, c, s)
 			case "ldbc":
 				s = loadConst(root.Commands[e], datatypes.Bit, c, s)
+
+			//TODO: Pointers, string functions, logical operators, prepare variables
 			}
 		}
 	}
