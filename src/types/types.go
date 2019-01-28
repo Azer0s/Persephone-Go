@@ -15,6 +15,11 @@ const(
 	Or Op = 0x11
 	Xor Op = 0x12
 	Not Op = 0x13
+
+	Le Op = 0x20
+	Ge Op = 0x21
+	L Op = 0x22
+	G Op = 0x23
 )
 
 const(

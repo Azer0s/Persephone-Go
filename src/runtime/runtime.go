@@ -155,6 +155,18 @@ func intOp(s stack, op types.Op) stack{
 		result = left | right
 	case types.Xor:
 		result = left ^ right
+	case types.Le:
+		s = s.Push(datatypes.Data{Value:left <= right, Type:datatypes.Bit})
+		return s
+	case types.Ge:
+		s = s.Push(datatypes.Data{Value:left >= right, Type:datatypes.Bit})
+		return s
+	case types.L:
+		s = s.Push(datatypes.Data{Value:left < right, Type:datatypes.Bit})
+		return s
+	case types.G:
+		s = s.Push(datatypes.Data{Value:left > right, Type:datatypes.Bit})
+		return s
 	}
 
 	if isPtr {
@@ -223,6 +235,18 @@ func floatOp(s stack, op types.Op) stack{
 		result = left * right
 	case types.Div:
 		result = left / right
+	case types.Le:
+		s = s.Push(datatypes.Data{Value:left <= right, Type:datatypes.Bit})
+		return s
+	case types.Ge:
+		s = s.Push(datatypes.Data{Value:left >= right, Type:datatypes.Bit})
+		return s
+	case types.L:
+		s = s.Push(datatypes.Data{Value:left < right, Type:datatypes.Bit})
+		return s
+	case types.G:
+		s = s.Push(datatypes.Data{Value:left > right, Type:datatypes.Bit})
+		return s
 	}
 
 	return pushFloatVar(result, min, s)
@@ -391,7 +415,7 @@ func call(command types.Command, s stack) stack{
 	switch types.Op(num) {
 	case types.Print:
 		fmt.Println(v.Value)
-	//TODO: Finish
+	//TODO: Finish (functions, pointers)
 	}
 
 	return s
@@ -428,7 +452,19 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 	return nil,nil
 }
 
-func Run (root types.Root){
+/*
+Extern
+ */
+
+func extern(command types.Command, v map[string]datatypes.Data) map[string]datatypes.Data {
+	switch command.Param.Text {
+	case "RETURN_CODE":
+		v["RETURN_CODE"] = datatypes.Data{Value:int8(0),Type:datatypes.Int8}
+	}
+	return v
+}
+
+func Run (root types.Root) int8 {
 	s := make(stack,0)
 	var c []datatypes.Data
 	v := make(map[string]datatypes.Data)
@@ -464,6 +500,15 @@ func Run (root types.Root){
 				s = intOp(s, types.Shl)
 			case "shr":
 				s = intOp(s, types.Shr)
+			case "ge":
+				s = intOp(s, types.Ge)
+			case "le":
+				s = intOp(s, types.Le)
+			case "gt":
+				s = intOp(s, types.G)
+			case "lt":
+				s = intOp(s, types.L)
+
 
 			/*
 			Arithmetic float operations
@@ -476,6 +521,14 @@ func Run (root types.Root){
 				s = floatOp(s, types.Mul)
 			case "divf":
 				s = floatOp(s, types.Div)
+			case "gef":
+				s = floatOp(s, types.Ge)
+			case "lef":
+				s = floatOp(s, types.Le)
+			case "gtf":
+				s = floatOp(s, types.G)
+			case "ltf":
+				s = floatOp(s, types.L)
 			}
 		}else{
 			switch root.Commands[e].Command.Text {
@@ -497,6 +550,28 @@ func Run (root types.Root){
 			case "jmp":
 				lbl := root.Commands[e].Param.Text
 				e = root.Labels[lbl] - 1
+			case "jmpt":
+				var val datatypes.Data
+				s, val = s.Pop()
+
+				if val.Value.(bool) {
+					lbl := root.Commands[e].Param.Text
+					e = root.Labels[lbl] - 1
+				}
+			case "jmpf":
+				var val datatypes.Data
+				s, val = s.Pop()
+
+				if !val.Value.(bool) {
+					lbl := root.Commands[e].Param.Text
+					e = root.Labels[lbl] - 1
+				}
+
+			/*
+			Extern
+			 */
+			case "extern":
+				v = extern(root.Commands[e], v)
 
 			/*
 			Declare int constant
@@ -603,4 +678,10 @@ func Run (root types.Root){
 			}
 		}
 	}
+
+	if val, ok := v["RETURN_CODE"]; ok {
+		return val.Value.(int8)
+	}
+	
+	return 0
 }

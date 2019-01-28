@@ -10,12 +10,14 @@ import (
 	"os"
 )
 
-func main(){
+func main() { os.Exit(mainReturnWithCode()) }
+
+func mainReturnWithCode() int{
 	filename, workdir := configuration.GetConfig(os.Args[1:])
 
 	if filename == "" || workdir == "" {
 		fmt.Println("Invalid parameters!")
-		return
+		return 1
 	}
 
 	fmt.Println("Working directory: " + workdir)
@@ -24,5 +26,5 @@ func main(){
 	code := filereader.ReadFile(filename)
 	commands := lexer.Lex(code)
 	root := parser.Parse(commands)
-	runtime.Run(root)
+	return int(runtime.Run(root))
 }
