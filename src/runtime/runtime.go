@@ -433,7 +433,7 @@ func Run (root types.Root){
 	var c []datatypes.Data
 	v := make(map[string]datatypes.Data)
 
-	for e := range root.Commands {
+	for e := 0; e < len(root.Commands); e++ {
 		if root.Commands[e].Single {
 			switch root.Commands[e].Command.Text {
 			case "pop":
@@ -490,6 +490,13 @@ func Run (root types.Root){
 			 */
 			case "store":
 				s,v = store(root.Commands[e], s, v)
+
+			/*
+			Jump
+			 */
+			case "jmp":
+				lbl := root.Commands[e].Param.Text
+				e = root.Labels[lbl] - 1
 
 			/*
 			Declare int constant

@@ -8,5 +8,8 @@ add
 call 0x01
 
 dcsa "Hello world"
+
+loop:
 ldsac 2
 call 0x01
+jmp loop
