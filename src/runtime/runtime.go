@@ -426,6 +426,7 @@ Store
  */
 
 func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, map[string]datatypes.Data) {
+	//TODO: pionters
 	d := v[command.Param.Text].Type
 	var t datatypes.Data
 	s,t = s.Pop()
