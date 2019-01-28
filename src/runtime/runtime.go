@@ -36,6 +36,23 @@ func pushIntVar(val int64, d datatypes.DataType, s stack) stack{
 	return s
 }
 
+func pushIntVarMem(val int64, d datatypes.DataType, s string, v map[string]datatypes.Data) map[string]datatypes.Data{
+	switch d {
+	case datatypes.Ptr:
+		v[s] = datatypes.Data{Value:int32(val),Type:datatypes.Ptr}
+	case datatypes.Int8:
+		v[s] = datatypes.Data{Value:int8(val),Type:datatypes.Int8}
+	case datatypes.Int16:
+		v[s] = datatypes.Data{Value:int16(val),Type:datatypes.Int16}
+	case datatypes.Int32:
+		v[s] = datatypes.Data{Value:int32(val),Type:datatypes.Int32}
+	case datatypes.Int64:
+		v[s] = datatypes.Data{Value:int64(val),Type:datatypes.Int64}
+	}
+
+	return v
+}
+
 func pushFloatVar(val float64, d datatypes.DataType, s stack) stack{
 	switch d {
 	case datatypes.Float32:
@@ -45,6 +62,17 @@ func pushFloatVar(val float64, d datatypes.DataType, s stack) stack{
 	}
 
 	return s
+}
+
+func pushFloatVarMem(val float64, d datatypes.DataType, s string, v map[string]datatypes.Data) map[string]datatypes.Data{
+	switch d {
+	case datatypes.Float32:
+		v[s] = datatypes.Data{Value:float32(val),Type:datatypes.Float32}
+	case datatypes.Float64:
+		v[s] = datatypes.Data{Value:float64(val),Type:datatypes.Float64}
+	}
+
+	return v
 }
 
 /*
@@ -363,9 +391,41 @@ func call(command types.Command, s stack) stack{
 	switch types.Op(num) {
 	case types.Print:
 		fmt.Println(v.Value)
+	//TODO: Finish
 	}
 
 	return s
+}
+
+/*
+Store
+ */
+
+func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, map[string]datatypes.Data) {
+	d := v[command.Param.Text].Type
+	var t datatypes.Data
+	s,t = s.Pop()
+
+	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && t.Type >= datatypes.String_ASCII && t.Type <= datatypes.String_Unicode {
+		v[command.Param.Text] = t
+		return s, v
+	}
+
+	if d >= datatypes.Float32 && d <= datatypes.Float64 && t.Type >= datatypes.Float32 && t.Type <= datatypes.Float64 {
+		return s, pushFloatVarMem(getFloat64(t),d,command.Param.Text,v)
+	}
+
+	if d >= datatypes.Ptr && d <= datatypes.Int64 && t.Type >= datatypes.Ptr && t.Type <= datatypes.Int64 {
+		return s, pushIntVarMem(getInt64(t),d,command.Param.Text,v)
+	}
+
+	if d == datatypes.Bit && t.Type == datatypes.Bit {
+		v[command.Param.Text] = t
+		return s,v
+	}
+
+	fmt.Println("Type mismatch!")
+	return nil,nil
 }
 
 func Run (root types.Root){
@@ -424,6 +484,12 @@ func Run (root types.Root){
 			 */
 			case "call":
 				s = call(root.Commands[e], s)
+
+			/*
+			Store
+			 */
+			case "store":
+				s,v = store(root.Commands[e], s, v)
 
 			/*
 			Declare int constant
