@@ -19,6 +19,34 @@ func (s stack) Pop() (stack, datatypes.Data) {
 	return  s[:l-1], s[l-1]
 }
 
+func pushIntVar(val int64, d datatypes.DataType, s stack) stack{
+	switch d {
+	case datatypes.Ptr:
+		s = s.Push(datatypes.Data{Value:int32(val),Type:datatypes.Ptr})
+	case datatypes.Int8:
+		s = s.Push(datatypes.Data{Value:int8(val),Type:datatypes.Int8})
+	case datatypes.Int16:
+		s = s.Push(datatypes.Data{Value:int16(val),Type:datatypes.Int16})
+	case datatypes.Int32:
+		s = s.Push(datatypes.Data{Value:int32(val),Type:datatypes.Int32})
+	case datatypes.Int64:
+		s = s.Push(datatypes.Data{Value:int64(val),Type:datatypes.Int64})
+	}
+
+	return s
+}
+
+func pushFloatVar(val float64, d datatypes.DataType, s stack) stack{
+	switch d {
+	case datatypes.Float32:
+		s = s.Push(datatypes.Data{Value:float32(val),Type:datatypes.Float32})
+	case datatypes.Float64:
+		s = s.Push(datatypes.Data{Value:float64(val),Type:datatypes.Float64})
+	}
+
+	return s
+}
+
 /*
 Arithmetic operations
  */
@@ -106,18 +134,7 @@ func intOp(s stack, op datatypes.Op) stack{
 		return s
 	}
 
-	switch min {
-	case datatypes.Int8:
-		s = s.Push(datatypes.Data{Value:int8(result),Type:datatypes.Int8})
-	case datatypes.Int16:
-		s = s.Push(datatypes.Data{Value:int16(result),Type:datatypes.Int16})
-	case datatypes.Int32:
-		s = s.Push(datatypes.Data{Value:int32(result),Type:datatypes.Int32})
-	case datatypes.Int64:
-		s = s.Push(datatypes.Data{Value:int64(result),Type:datatypes.Int64})
-	}
-
-	return s
+	return pushIntVar(result, min, s)
 }
 
 func negateInt(s stack) stack{
@@ -132,18 +149,7 @@ func negateInt(s stack) stack{
 	opInt := getInt64(op)
 	opInt = ^opInt
 
-	switch op.Type {
-	case datatypes.Int8:
-		s = s.Push(datatypes.Data{Value:int8(opInt),Type:datatypes.Int8})
-	case datatypes.Int16:
-		s = s.Push(datatypes.Data{Value:int16(opInt),Type:datatypes.Int16})
-	case datatypes.Int32:
-		s = s.Push(datatypes.Data{Value:int32(opInt),Type:datatypes.Int32})
-	case datatypes.Int64:
-		s = s.Push(datatypes.Data{Value:int64(opInt),Type:datatypes.Int64})
-	}
-
-	return s
+	return pushIntVar(opInt, op.Type, s)
 }
 
 func getFloat64(data datatypes.Data) float64{
@@ -191,14 +197,7 @@ func floatOp(s stack, op datatypes.Op) stack{
 		result = left / right
 	}
 
-	switch min {
-	case datatypes.Float32:
-		s = s.Push(datatypes.Data{Value:float32(result),Type:datatypes.Float32})
-	case datatypes.Float64:
-		s = s.Push(datatypes.Data{Value:float64(result),Type:datatypes.Float64})
-	}
-
-	return s
+	return pushFloatVar(result, min, s)
 }
 
 /*
@@ -271,9 +270,8 @@ func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.D
 /*
 Variable declaration
  */
- 
-func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data{
 
+func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data{
 	switch d {
 	case datatypes.Bit:
 		v[command.Param.Text] = datatypes.Data{Value:false,Type:datatypes.Bit}
@@ -298,6 +296,33 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 	}
 
 	return v
+}
+
+/*
+Load on stack
+ */
+
+func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack{
+	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && v[command.Param.Text].Type >= datatypes.String_ASCII && v[command.Param.Text].Type <= datatypes.String_Unicode {
+		s = s.Push(v[command.Param.Text])
+		return s
+	}
+
+	if d >= datatypes.Float32 && d <= datatypes.Float64 && v[command.Param.Text].Type >= datatypes.Float32 && v[command.Param.Text].Type <= datatypes.Float64 {
+		return pushFloatVar(getFloat64(v[command.Param.Text]), d, s)
+	}
+
+	if d >= datatypes.Ptr && d <= datatypes.Int64 && v[command.Param.Text].Type >= datatypes.Ptr && v[command.Param.Text].Type <= datatypes.Int64 {
+		return pushIntVar(getInt64(v[command.Param.Text]), d, s)
+	}
+
+	if d == datatypes.Bit && v[command.Param.Text].Type == datatypes.Bit {
+		s = s.Push(v[command.Param.Text])
+		return s
+	}
+
+	fmt.Println("Type mismatch!")
+	return nil
 }
 
 func Run (root types.Root){
@@ -412,15 +437,25 @@ func Run (root types.Root){
 			Load variable onto stack
 			 */
 			case "ldi8v":
+				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
 			case "ldi16v":
+				s = loadVar(root.Commands[e], datatypes.Int16, v, s)
 			case "ldi32v", "ldiv":
+				s = loadVar(root.Commands[e], datatypes.Int32, v, s)
 			case "ldi64v":
+				s = loadVar(root.Commands[e], datatypes.Int64, v, s)
 			case "ldf32v", "ldfv":
+				s = loadVar(root.Commands[e], datatypes.Float32, v, s)
 			case "ldf64v", "lddv":
-			case "ldsav", "ldsuv":
+				s = loadVar(root.Commands[e], datatypes.Float64, v, s)
+			case "ldsav":
+				s = loadVar(root.Commands[e], datatypes.String_ASCII, v, s)
+			case "ldsuv":
+				s = loadVar(root.Commands[e], datatypes.String_Unicode, v, s)
 			case "ldbv":
+				s = loadVar(root.Commands[e], datatypes.Bit, v, s)
 			case "ldptrv":
-
+				s = loadVar(root.Commands[e], datatypes.Ptr, v, s)
 			}
 		}
 	}
