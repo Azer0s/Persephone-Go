@@ -22,6 +22,22 @@ func (s stack) Pop() (stack, datatypes.Data) {
 /*
 Arithmetic operations
  */
+func getInt64(data datatypes.Data) int64{
+	switch data.Type {
+	case datatypes.Ptr:
+		return int64(data.Value.(int32))
+	case datatypes.Int8:
+		return int64(data.Value.(int8))
+	case datatypes.Int16:
+		return int64(data.Value.(int16))
+	case datatypes.Int32:
+		return int64(data.Value.(int32))
+	case datatypes.Int64:
+		return int64(data.Value.(int64))
+	default:
+		return 0
+	}
+}
 
 func intOp(s stack, op datatypes.Op) stack{
 	var a1 datatypes.Data
@@ -45,34 +61,8 @@ func intOp(s stack, op datatypes.Op) stack{
 		min = datatypes.Int32
 	}
 
-	var left int64
-	var right int64
-
-	switch a1.Type {
-	case datatypes.Ptr:
-		left = int64(a1.Value.(int32))
-	case datatypes.Int8:
-		left = int64(a1.Value.(int8))
-	case datatypes.Int16:
-		left = int64(a1.Value.(int16))
-	case datatypes.Int32:
-		left = int64(a1.Value.(int32))
-	case datatypes.Int64:
-		left = int64(a1.Value.(int64))
-	}
-
-	switch a2.Type {
-	case datatypes.Ptr:
-		right = int64(a2.Value.(int32))
-	case datatypes.Int8:
-		right = int64(a2.Value.(int8))
-	case datatypes.Int16:
-		right = int64(a2.Value.(int16))
-	case datatypes.Int32:
-		right = int64(a2.Value.(int32))
-	case datatypes.Int64:
-		right = int64(a2.Value.(int64))
-	}
+	left := getInt64(a1)
+	right := getInt64(a2)
 
 	var result int64
 
@@ -96,6 +86,12 @@ func intOp(s stack, op datatypes.Op) stack{
 		}else {
 			result = int64(leftu >> rightu)
 		}
+	case datatypes.And:
+		result = left & right
+	case datatypes.Or:
+		result = left | right
+	case datatypes.Xor:
+		result = left ^ right
 	}
 
 	switch min {
@@ -110,6 +106,17 @@ func intOp(s stack, op datatypes.Op) stack{
 	}
 
 	return s
+}
+
+func getFloat64(data datatypes.Data) float64{
+	switch data.Type {
+	case datatypes.Float32:
+		return float64(data.Value.(float32))
+	case datatypes.Float64:
+		return float64(data.Value.(float64))
+	default:
+		return 0
+	}
 }
 
 func floatOp(s stack, op datatypes.Op) stack{
@@ -130,22 +137,8 @@ func floatOp(s stack, op datatypes.Op) stack{
 		min = a2.Type
 	}
 
-	var left float64
-	var right float64
-
-	switch a1.Type {
-	case datatypes.Float32:
-		left = float64(a1.Value.(float32))
-	case datatypes.Float64:
-		left = float64(a1.Value.(float64))
-	}
-
-	switch a2.Type {
-	case datatypes.Float32:
-		right = float64(a2.Value.(float32))
-	case datatypes.Float64:
-		right = float64(a2.Value.(float64))
-	}
+	left := getFloat64(a1)
+	right := getFloat64(a2)
 
 	var result float64
 
@@ -292,6 +285,14 @@ func Run (root types.Root){
 				s = intOp(s, datatypes.Div)
 			case "mod":
 				s = intOp(s, datatypes.Mod)
+			case "andi":
+				s = intOp(s, datatypes.And)
+			case "ori":
+				s = intOp(s, datatypes.Or)
+			case "xori":
+				s = intOp(s, datatypes.Xor)
+			case "noti":
+				//TODO
 			case "shl":
 				s = intOp(s, datatypes.Shl)
 			case "shr":
@@ -367,6 +368,20 @@ func Run (root types.Root){
 				v = declareVar(root.Commands[e], datatypes.Bit, v)
 			case "v_ptr":
 				v = declareVar(root.Commands[e], datatypes.Ptr, v)
+
+			/*
+			Load variable onto stack
+			 */
+			case "ldi8v":
+			case "ldi16v":
+			case "ldi32v", "ldiv":
+			case "ldi64v":
+			case "ldf32v", "ldfv":
+			case "ldf64v", "lddv":
+			case "ldsav", "ldsuv":
+			case "ldbv":
+			case "ldptrv":
+
 			}
 		}
 	}

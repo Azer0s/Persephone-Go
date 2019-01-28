@@ -11,6 +11,11 @@ const(
 	Mod Op = 0x4
 	Shl Op = 0x5
 	Shr Op = 0x6
+
+	And Op = 0x10
+	Or Op = 0x11
+	Xor Op = 0x12
+	Not Op = 0x13
 )
 
 const(
