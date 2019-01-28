@@ -30,6 +30,11 @@ func intOp(s stack, op datatypes.Op) stack{
 	s,a1 = s.Pop()
 	s,a2 = s.Pop()
 
+	if !(a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Int64 && a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Int64) {
+		fmt.Println("Only int or ptr allowed in int operations!")
+		return nil
+	}
+
 	min := a1.Type
 
 	if a2.Type > min {
@@ -113,6 +118,11 @@ func floatOp(s stack, op datatypes.Op) stack{
 
 	s,a1 = s.Pop()
 	s,a2 = s.Pop()
+
+	if !(a1.Type >= datatypes.Float32 && a1.Type <= datatypes.Float64 && a2.Type >= datatypes.Float32 && a2.Type <= datatypes.Float64) {
+		fmt.Println("Only float allowed in float operations!")
+		return nil
+	}
 
 	min := a1.Type
 
@@ -233,8 +243,6 @@ Variable declaration
 func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data{
 
 	switch d {
-	case datatypes.Dyn:
-		v[command.Param.Text] = datatypes.Data{Value:datatypes.Data{Value:int32(0),Type:datatypes.Int32},Type:datatypes.Dyn}
 	case datatypes.Bit:
 		v[command.Param.Text] = datatypes.Data{Value:false,Type:datatypes.Bit}
 	case datatypes.Ptr:
@@ -357,8 +365,6 @@ func Run (root types.Root){
 				v = declareVar(root.Commands[e], datatypes.String_Unicode, v)
 			case "v_bit":
 				v = declareVar(root.Commands[e], datatypes.Bit, v)
-			case "v_dyn":
-				v = declareVar(root.Commands[e], datatypes.Dyn, v)
 			case "v_ptr":
 				v = declareVar(root.Commands[e], datatypes.Ptr, v)
 			}
