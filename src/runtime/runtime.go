@@ -265,6 +265,48 @@ func floatOp(s stack, op types.Op) stack {
 }
 
 /*
+Logical operations
+ */
+
+func bitOp(s stack, op types.Op) stack{
+	var left datatypes.Data
+	var right datatypes.Data
+
+	s, right = s.Pop()
+
+	if right.Type != datatypes.Bit {
+		fmt.Println("Only bit allowed in bit operations!")
+		return nil
+	}
+
+	if op == types.Not {
+		s = s.Push(datatypes.Data{Value:!right.Value.(bool),Type:datatypes.Bit})
+		return s
+	}
+
+	if left.Type != datatypes.Bit {
+		fmt.Println("Only bit allowed in bit operations!")
+		return nil
+	}
+
+	s, left = s.Pop()
+
+	var result bool
+
+	switch op {
+	case types.And:
+		result = left.Value.(bool) && right.Value.(bool)
+	case types.Or:
+		result = left.Value.(bool) || right.Value.(bool)
+	case types.Xor:
+		result = left.Value.(bool) != right.Value.(bool)
+	}
+
+	s = s.Push(datatypes.Data{Value:result,Type:datatypes.Bit})
+	return s
+}
+
+/*
 Constant declarations
 */
 
@@ -582,6 +624,15 @@ func Run(root types.Root) int8 {
 				s = floatOp(s, types.G)
 			case "ltf":
 				s = floatOp(s, types.L)
+
+			case "and":
+				s = bitOp(s, types.And)
+			case "or":
+				s = bitOp(s, types.Or)
+			case "xor":
+				s = bitOp(s, types.Xor)
+			case "not":
+				s = bitOp(s, types.Not)
 
 			/*
 			Cbase
