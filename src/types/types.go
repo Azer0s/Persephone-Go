@@ -47,7 +47,7 @@ type Token struct {
 }
 
 type Root struct{
-	Functions []Function
+	Functions map[string]Function
 	Commands []Command
 	Labels map[string]int
 }

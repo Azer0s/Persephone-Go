@@ -10,7 +10,9 @@ import (
 
 type stack []datatypes.Data
 
-var varAddresses []string
+var varAddress int = 0
+var addresses []string
+var revAddresses map[string]int
 
 func (s stack) Push(v datatypes.Data) stack {
 	return append(s, v)
@@ -326,7 +328,9 @@ Variable declaration
 
 func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data {
 
-	varAddresses = append(varAddresses, command.Param.Text)
+	addresses = append(addresses,command.Param.Text)
+	revAddresses[command.Param.Text] = varAddress
+	varAddress++
 
 	switch d {
 	case datatypes.Bit:
@@ -469,7 +473,21 @@ func extern(command types.Command, v map[string]datatypes.Data) map[string]datat
 
 func Run(root types.Root) int8 {
 	s := make(stack, 0)
-	varAddresses = make([]string, 0)
+	addresses = make([]string,0)
+	revAddresses = make(map[string]int)
+
+	for k := range root.Labels {
+		addresses = append(addresses,k)
+		revAddresses[k] = varAddress
+		varAddress++
+	}
+
+	for k := range root.Functions {
+		addresses = append(addresses,k)
+		revAddresses[k] = varAddress
+		varAddress++
+	}
+
 	var c []datatypes.Data
 	v := make(map[string]datatypes.Data)
 
@@ -682,6 +700,8 @@ func Run(root types.Root) int8 {
 			case "ldbc":
 				s = loadConst(root.Commands[e], datatypes.Bit, c, s)
 
+			case "ldfnptr":
+				//s = s.Push(datatypes.Data{Value:find(),Type:datatypes.Ptr})
 				//TODO: Pointers, string functions, logical operators, prepare variables
 			}
 		}

@@ -1,6 +1,7 @@
 package datatypes
 
 type DataType int16
+type PtrType int8
 
 const(
 	Bit DataType = 0x01

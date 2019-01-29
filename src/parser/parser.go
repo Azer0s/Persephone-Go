@@ -72,6 +72,7 @@ func Parse (tks []types.Token) (root types.Root){
 	tokens = tks
 	index = 0
 	root.Labels = make(map[string]int)
+	root.Functions = make(map[string]types.Function)
 
 	for index = 0; index < len(tokens); index++{
 		if tokens[index].Kind == types.Name && getNextToken().Kind == types.Lbrace {
@@ -85,7 +86,7 @@ func Parse (tks []types.Token) (root types.Root){
 				index++
 			}
 
-			root.Functions = append(root.Functions, fn)
+			root.Functions[fn.Name.Text] = fn
 		}else if tokens[index].Kind == types.Label{
 			root.Labels[tokens[index].Text] = len(root.Commands)
 		}else{
