@@ -180,19 +180,27 @@ func intOp(s stack, op types.Op) stack {
 	return pushIntVar(result, min, s)
 }
 
-func negateInt(s stack) stack {
-	var op datatypes.Data
-	s, op = s.Pop()
+func intSingleOp(s stack, op types.Op) stack {
+	var opv datatypes.Data
+	s, opv = s.Pop()
 
-	if !(op.Type >= datatypes.Int8 && op.Type <= datatypes.Int64) {
+	if !(opv.Type >= datatypes.Ptr && opv.Type <= datatypes.Int64) {
 		fmt.Println("Only int or bit allowed in negate operation!")
 		return nil
 	}
 
-	opInt := getInt64(op)
-	opInt = ^opInt
+	opInt := getInt64(opv)
 
-	return pushIntVar(opInt, op.Type, s)
+	switch op {
+	case types.Not:
+		opInt = ^opInt
+	case types.Inc:
+		opInt++
+	case types.Dec:
+		opInt--
+	}
+
+	return pushIntVar(opInt, opv.Type, s)
 }
 
 func getFloat64(data datatypes.Data) float64 {
@@ -410,10 +418,10 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 }
 
 /*
-Call
+Syscall
 */
 
-func call(command types.Command, s stack) stack {
+func syscall(command types.Command, s stack) stack {
 	var num int64
 	num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
 
@@ -425,6 +433,14 @@ func call(command types.Command, s stack) stack {
 		fmt.Println(v.Value)
 	}
 
+	return s
+}
+
+/*
+Syscall
+*/
+
+func call(command types.Command, s stack) stack {
 	return s
 }
 
@@ -517,7 +533,7 @@ func Run(root types.Root) int8 {
 			case "xori":
 				s = intOp(s, types.Xor)
 			case "noti":
-				s = negateInt(s)
+				s = intSingleOp(s, types.Not)
 			case "shl":
 				s = intOp(s, types.Shl)
 			case "shr":
@@ -530,6 +546,10 @@ func Run(root types.Root) int8 {
 				s = intOp(s, types.G)
 			case "lt":
 				s = intOp(s, types.L)
+			case "inc":
+				s = intSingleOp(s, types.Inc)
+			case "dec":
+				s = intSingleOp(s, types.Dec)
 
 			/*
 				Arithmetic float operations
@@ -553,6 +573,13 @@ func Run(root types.Root) int8 {
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
+			/*
+				Syscall
+				TODO: Pointers, num values, functions
+			*/
+			case "syscall":
+				s = syscall(root.Commands[e], s)
+
 			/*
 				Call
 				TODO: Pointers, num values, functions
@@ -700,9 +727,9 @@ func Run(root types.Root) int8 {
 			case "ldbc":
 				s = loadConst(root.Commands[e], datatypes.Bit, c, s)
 
-			case "ldfnptr":
-				//s = s.Push(datatypes.Data{Value:find(),Type:datatypes.Ptr})
-				//TODO: Pointers, string functions, logical operators, prepare variables
+			case "ldptr":
+				s = s.Push(datatypes.Data{Value:int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
+				//TODO: string functions, logical operators, prepare variables
 			}
 		}
 	}

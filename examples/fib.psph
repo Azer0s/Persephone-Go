@@ -36,10 +36,10 @@ add
 store var_02
 
 ldi32v var_01
-call 0x01 # print var_01
+syscall 0x01 # print var_01
 
 ldi32v var_02
-call 0x01 # print var_02
+syscall 0x01 # print var_02
 
 jmp loop
 

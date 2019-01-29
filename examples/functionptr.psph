@@ -1,7 +1,7 @@
 dcsa "Hello world"
 
 print {
-    call 0x01
+    syscall 0x01
 }
 
 v_ptr print_ptr

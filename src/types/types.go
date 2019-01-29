@@ -20,6 +20,9 @@ const(
 	Ge Op = 0x21
 	L Op = 0x22
 	G Op = 0x23
+
+	Inc Op = 0x30
+	Dec Op = 0x31
 )
 
 const(

@@ -7,15 +7,20 @@ v_int32 var2
 v_int32 var3
 v_int32 var4
 
+v_ptr var0_ptr
+ldptr var0
+store var0_ptr
+
+ldptrv var0_ptr
+inc
+store var0_ptr
+
 ldi32c 0
 ldi32c 1
 add
 
-call 0x01
+syscall 0x01
 
 dcsa "Hello world"
-
-loop:
 ldsac 2
-call 0x01
-jmp loop
+syscall 0x01
