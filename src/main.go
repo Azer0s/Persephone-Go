@@ -23,7 +23,7 @@ func mainReturnWithCode() int {
 	fmt.Println("Working directory: " + workdir)
 	fmt.Println("File: " + filename)
 
-	code := filereader.ReadFile(filename)
+	code := filereader.ReadFile(filename, workdir)
 	commands := lexer.Lex(code)
 	root := parser.Parse(commands)
 	return int(runtime.Run(root))

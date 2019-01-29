@@ -1,11 +1,17 @@
 dci32 4
 dci32 16
 
+%include fib.psph
+
+%region Array1
+
 v_int32 var0
 v_int32 var1
 v_int32 var2
 v_int32 var3
 v_int32 var4
+
+%endregion
 
 v_ptr var0_ptr
 ldptr var0

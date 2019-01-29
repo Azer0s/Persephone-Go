@@ -2,7 +2,6 @@ package configuration
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 )
 
@@ -20,7 +19,7 @@ func GetConfig(args []string)(file, workdir string){
 	}
 
 	if workdir == ""{
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		dir, err := filepath.Abs(filepath.Dir(file))
 		if err != nil {
 			fmt.Println(err)
 			return "",""
