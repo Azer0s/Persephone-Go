@@ -4,3 +4,5 @@ dci32 42
 ldi32c 1
 ldsac 0
 conc
+
+syscall 0x01

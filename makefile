@@ -17,3 +17,6 @@ persephone:
 
 run/%.psph: %.psph
 	@./bin/persephone -i $<
+
+test:
+	@eval "for f in examples/*.psph; do ./bin/persephone -i $f; done"
