@@ -703,6 +703,15 @@ func Run(root types.Root) int8 {
 			case "store":
 				s, v = store(root.Commands[e], s, v)
 
+			case "len":
+				a1 := v[root.Commands[e].Param.Text]
+
+				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type:datatypes.Int32})
+				}else{
+					panic("Value is not of type stringa or stringu!")
+				}
+				
 			/*
 				Jump
 			*/

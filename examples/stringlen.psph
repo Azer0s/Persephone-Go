@@ -1,0 +1,6 @@
+v_stringa h
+dcsa "Foo"
+ldsac 0
+store h
+len h
+syscall 0x01
