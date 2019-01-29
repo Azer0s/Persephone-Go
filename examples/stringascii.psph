@@ -1,0 +1,8 @@
+dci8 65
+v_stringa char
+
+ldi8c 0
+store char
+
+ldsav char
+syscall 0x01

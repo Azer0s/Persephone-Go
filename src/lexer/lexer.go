@@ -4,6 +4,7 @@ import (
 	"../types"
 	"fmt"
 	"regexp"
+	"strconv"
 )
 
 var current = types.Token{Kind: "", Text:""}
@@ -96,6 +97,13 @@ func Lex(lines []string) (tokens []types.Token){
 				consume()
 			}
 			consume()
+		}else if letter() == "'"{
+			discard()
+			consume()
+			discard()
+
+			current.Text = strconv.Itoa(int(int8(current.Text[0])))
+			current.Kind = types.Number
 		}else{
 			fmt.Println("Unknown token: " + letter() + "!")
 			return nil

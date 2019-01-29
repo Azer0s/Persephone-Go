@@ -531,6 +531,13 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 		return s, v
 	}
 
+	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode {
+		if t.Type == datatypes.Int8 {
+			v[name] = datatypes.Data{Value:string(t.Value.(int8)),Type:v[name].Type}
+			return s,v
+		}
+	}
+
 	if d >= datatypes.Float32 && d <= datatypes.Float64 && t.Type >= datatypes.Float32 && t.Type <= datatypes.Float64 {
 		return s, pushFloatVarMem(getFloat64(t), d, name, v)
 	}
