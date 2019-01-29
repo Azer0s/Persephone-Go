@@ -1,0 +1,24 @@
+dci32 2
+
+v_int32 var0
+v_int32 var1
+v_int32 var2
+v_int32 var3
+v_int32 var4
+
+v_ptr arr_ptr
+ldptr var0
+store arr_ptr # arr_ptr is pointing to var0
+
+ldptrv arr_ptr
+ldi32c 0
+add
+store arr_ptr # arr_ptr is pointing to var2
+
+cbase
+dci32 42
+ldi32c 0
+store [arr_ptr] # store stack value in var2
+
+ldi32v [arr_ptr] # load var2 onto stack
+syscall 0x01

@@ -1,0 +1,10 @@
+dci8 0x01
+
+v_ptr print
+ldi8c 0
+store print
+
+cbase
+dcsa "Foo"
+ldsac 0
+syscall [print]

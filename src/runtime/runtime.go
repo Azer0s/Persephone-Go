@@ -425,21 +425,23 @@ Load value on stack
 */
 
 func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack {
-	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && v[command.Param.Text].Type >= datatypes.String_ASCII && v[command.Param.Text].Type <= datatypes.String_Unicode {
-		s = s.Push(v[command.Param.Text])
+	name := getByPtr(command, v)
+
+	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && v[name].Type >= datatypes.String_ASCII && v[name].Type <= datatypes.String_Unicode {
+		s = s.Push(v[name])
 		return s
 	}
 
-	if d >= datatypes.Float32 && d <= datatypes.Float64 && v[command.Param.Text].Type >= datatypes.Float32 && v[command.Param.Text].Type <= datatypes.Float64 {
-		return pushFloatVar(getFloat64(v[command.Param.Text]), d, s)
+	if d >= datatypes.Float32 && d <= datatypes.Float64 && v[name].Type >= datatypes.Float32 && v[name].Type <= datatypes.Float64 {
+		return pushFloatVar(getFloat64(v[name]), d, s)
 	}
 
-	if d >= datatypes.Ptr && d <= datatypes.Int64 && v[command.Param.Text].Type >= datatypes.Ptr && v[command.Param.Text].Type <= datatypes.Int64 {
-		return pushIntVar(getInt64(v[command.Param.Text]), d, s)
+	if d >= datatypes.Ptr && d <= datatypes.Int64 && v[name].Type >= datatypes.Ptr && v[name].Type <= datatypes.Int64 {
+		return pushIntVar(getInt64(v[name]), d, s)
 	}
 
-	if d == datatypes.Bit && v[command.Param.Text].Type == datatypes.Bit {
-		s = s.Push(v[command.Param.Text])
+	if d == datatypes.Bit && v[name].Type == datatypes.Bit {
+		s = s.Push(v[name])
 		return s
 	}
 
@@ -485,9 +487,23 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 Syscall
 */
 
-func syscall(command types.Command, s stack) stack {
+func syscall(command types.Command, s stack, vars map[string]datatypes.Data) stack {
 	var num int64
-	num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
+
+	switch command.Param.Kind {
+	case types.HexNumber:
+		num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
+	case types.Pointer:
+		val := vars[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
+
+		if val.Type != datatypes.Ptr {
+			fmt.Println("Variable is not a pointer!")
+			return nil
+		}
+
+		num = int64(val.Value.(int32))
+	}
+
 
 	var v datatypes.Data
 	s, v = s.Pop()
@@ -505,25 +521,26 @@ Store
 */
 
 func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, map[string]datatypes.Data) {
-	d := v[command.Param.Text].Type
+	name := getByPtr(command,v)
+	d := v[name].Type
 	var t datatypes.Data
 	s, t = s.Pop()
 
 	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && t.Type >= datatypes.String_ASCII && t.Type <= datatypes.String_Unicode {
-		v[command.Param.Text] = t
+		v[name] = t
 		return s, v
 	}
 
 	if d >= datatypes.Float32 && d <= datatypes.Float64 && t.Type >= datatypes.Float32 && t.Type <= datatypes.Float64 {
-		return s, pushFloatVarMem(getFloat64(t), d, command.Param.Text, v)
+		return s, pushFloatVarMem(getFloat64(t), d, name, v)
 	}
 
 	if d >= datatypes.Ptr && d <= datatypes.Int64 && t.Type >= datatypes.Ptr && t.Type <= datatypes.Int64 {
-		return s, pushIntVarMem(getInt64(t), d, command.Param.Text, v)
+		return s, pushIntVarMem(getInt64(t), d, name, v)
 	}
 
 	if d == datatypes.Bit && t.Type == datatypes.Bit {
-		v[command.Param.Text] = t
+		v[name] = t
 		return s, v
 	}
 
@@ -543,9 +560,8 @@ func extern(command types.Command, v map[string]datatypes.Data) map[string]datat
 	return v
 }
 
-func getLabel(command types.Command, v map[string]datatypes.Data) string{
+func getByPtr(command types.Command, v map[string]datatypes.Data) string{
 	switch command.Param.Kind {
-	case types.HexNumber:
 	case types.Pointer:
 		ptr := v[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
 
@@ -673,14 +689,12 @@ func Run(root types.Root) int8 {
 			switch root.Commands[e].Command.Text {
 			/*
 			Syscall
-			TODO: Pointers
 			*/
 			case "syscall":
-				s = syscall(root.Commands[e], s)
+				s = syscall(root.Commands[e], s, v)
 
 			/*
 			Store
-			TODO: Pointers
 			*/
 			case "store":
 				s, v = store(root.Commands[e], s, v)
@@ -689,14 +703,14 @@ func Run(root types.Root) int8 {
 			Jump
 			*/
 			case "jmp":
-				lbl := getLabel(root.Commands[e], v)
+				lbl := getByPtr(root.Commands[e], v)
 				e = root.Labels[lbl] - 1
 			case "jmpt":
 				var val datatypes.Data
 				s, val = s.Pop()
 
 				if val.Value.(bool) {
-					lbl := getLabel(root.Commands[e], v)
+					lbl := getByPtr(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
 			case "jmpf":
@@ -704,7 +718,7 @@ func Run(root types.Root) int8 {
 				s, val = s.Pop()
 
 				if !val.Value.(bool) {
-					lbl := getLabel(root.Commands[e], v)
+					lbl := getByPtr(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
 
@@ -713,7 +727,7 @@ func Run(root types.Root) int8 {
 			 */
 			case "call":
 				r = r.Push(e)
-				lbl := getLabel(root.Commands[e], v)
+				lbl := getByPtr(root.Commands[e], v)
 				e = root.Labels[lbl] - 1
 
 			/*
@@ -781,7 +795,6 @@ func Run(root types.Root) int8 {
 
 			/*
 			Load variable onto stack
-			TODO: pointer
 			*/
 			case "ldi8v":
 				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
