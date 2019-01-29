@@ -710,29 +710,29 @@ func Run(root types.Root) int8 {
 				s, v = store(root.Commands[e], s, v)
 
 			/*
-			String functions
-			 */
+				String functions
+			*/
 			case "len":
-				a1 := v[getByPtr(root.Commands[e],v)]
+				a1 := v[getByPtr(root.Commands[e], v)]
 
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
-					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type:datatypes.Int32})
-				}else{
+					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type: datatypes.Int32})
+				} else {
 					panic("Value is not of type stringa or stringu!")
 				}
 
 			case "getc":
-				a1 := v[getByPtr(root.Commands[e],v)]
+				a1 := v[getByPtr(root.Commands[e], v)]
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
 					var val datatypes.Data
 					s, val = s.Pop()
-					s = s.Push(datatypes.Data{Value: int8(a1.Value.(string)[getInt64(val)]), Type:datatypes.Int8})
-				}else{
+					s = s.Push(datatypes.Data{Value: int8(a1.Value.(string)[getInt64(val)]), Type: datatypes.Int8})
+				} else {
 					panic("Value is not of type stringa or stringu!")
 				}
 
 			case "setc":
-				a1 := v[getByPtr(root.Commands[e],v)]
+				a1 := v[getByPtr(root.Commands[e], v)]
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
 					var char datatypes.Data
 					s, char = s.Pop()
@@ -745,11 +745,11 @@ func Run(root types.Root) int8 {
 					}
 
 					tempVal := a1.Value.(string)
-					tempVal = replaceAtIndex(tempVal,rune(char.Value.(int8)),int(getInt64(pos)))
+					tempVal = replaceAtIndex(tempVal, rune(char.Value.(int8)), int(getInt64(pos)))
 					a1.Value = tempVal
 
-					s = s.Push(datatypes.Data{Value: tempVal, Type:datatypes.String_Unicode})
-				}else{
+					s = s.Push(datatypes.Data{Value: tempVal, Type: datatypes.String_Unicode})
+				} else {
 					panic("Value is not of type stringa or stringu!")
 				}
 
