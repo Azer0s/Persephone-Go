@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Azer0s/Persephone-Go.svg?branch=master)](https://travis-ci.org/Azer0s/Persephone-Go)  [![Go Report Card](https://goreportcard.com/badge/github.com/Azer0s/Persephone-Go)](https://goreportcard.com/report/github.com/Azer0s/Persephone-Go)
+
 # Persephone-Go
 
 A simple Persephone implementation in Go. 
@@ -16,3 +18,4 @@ $ cd Persephone-Go
 $ make
 $ make run/examples/fib.psph
 ```
+ 
