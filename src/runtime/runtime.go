@@ -664,6 +664,10 @@ func Run(root types.Root) int8 {
 			 */
 			case "ret":
 				r,e = r.Pop()
+
+			/*
+			TODO: string functions
+			 */
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
@@ -824,7 +828,6 @@ func Run(root types.Root) int8 {
 
 			case "ldptr":
 				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
-				//TODO: string functions
 			}
 		}
 	}
