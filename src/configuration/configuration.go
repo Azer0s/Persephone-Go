@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func GetConfig(args []string)(file, workdir string){
+func GetConfig(args []string) (file, workdir string) {
 
 	for k, v := range args {
 		switch v {
@@ -18,18 +18,18 @@ func GetConfig(args []string)(file, workdir string){
 		}
 	}
 
-	if workdir == ""{
+	if workdir == "" {
 		dir, err := filepath.Abs(filepath.Dir(file))
 		if err != nil {
 			fmt.Println(err)
-			return "",""
+			return "", ""
 		}
 		workdir = dir
 	}
 
 	if file == "" {
 		fmt.Println("Input file cannot be empty!")
-		return "",""
+		return "", ""
 	}
 
 	return

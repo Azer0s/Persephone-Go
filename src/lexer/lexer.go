@@ -7,25 +7,25 @@ import (
 	"strconv"
 )
 
-var current = types.Token{Kind: "", Text:""}
+var current = types.Token{Kind: "", Text: ""}
 var code string
 var index = 0
 
-func consume(){
+func consume() {
 	current.Text += letter()
 	index++
 }
 
-func discard()  {
+func discard() {
 	index++
 }
 
-func letter() string{
+func letter() string {
 	return string(code[index])
 }
 
-func Lex(lines []string) (tokens []types.Token){
-	add := func(){tokens = append(tokens, current); current = types.Token{Kind:"", Text:""}}
+func Lex(lines []string) (tokens []types.Token) {
+	add := func() { tokens = append(tokens, current); current = types.Token{Kind: "", Text: ""} }
 	trimComments := regexp.MustCompile("(.*)#.*")
 
 	for e := range lines {
@@ -36,12 +36,12 @@ func Lex(lines []string) (tokens []types.Token){
 	isNumber := regexp.MustCompile("[0-9]")
 
 	for index = 0; index < len(code); index++ {
-		if letter() == " " || letter() == "\t"{
+		if letter() == " " || letter() == "\t" {
 			continue
 		}
 
 		if isLetter.MatchString(letter()) {
-			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_"{
+			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_" {
 				consume()
 			}
 
@@ -51,17 +51,17 @@ func Lex(lines []string) (tokens []types.Token){
 				current.Kind = types.Label
 				discard()
 			}
-		}else if isNumber.MatchString(letter()) {
+		} else if isNumber.MatchString(letter()) {
 			consume()
 
 			if letter() == "x" {
 				current.Kind = types.HexNumber
 				consume()
-			}else{
+			} else {
 				current.Kind = types.Number
 			}
 
-			for isNumber.MatchString(letter()){
+			for isNumber.MatchString(letter()) {
 				consume()
 			}
 
@@ -72,39 +72,39 @@ func Lex(lines []string) (tokens []types.Token){
 				}
 				consume()
 				current.Kind = types.Float
-				for isNumber.MatchString(letter()){
+				for isNumber.MatchString(letter()) {
 					consume()
 				}
 			}
-		}else if letter() == "["{
+		} else if letter() == "[" {
 			current.Kind = types.Pointer
 			consume()
 
-			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_"{
+			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_" {
 				consume()
 			}
 
 			if letter() != "]" {
 				fmt.Println("Expected a closing ], got: " + letter() + "!")
 				return nil
-			}else{
+			} else {
 				consume()
 			}
-		}else if letter() == "\""{
+		} else if letter() == "\"" {
 			current.Kind = types.String
 			consume()
 			for letter() != "\"" {
 				consume()
 			}
 			consume()
-		}else if letter() == "'"{
+		} else if letter() == "'" {
 			discard()
 			consume()
 			discard()
 
 			current.Text = strconv.Itoa(int(int8(current.Text[0])))
 			current.Kind = types.Number
-		}else{
+		} else {
 			fmt.Println("Unknown token: " + letter() + "!")
 			return nil
 		}

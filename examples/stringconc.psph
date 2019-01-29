@@ -1,0 +1,6 @@
+dcsa "Bar"
+dci32 42
+
+ldi32c 1
+ldsac 0
+conc

@@ -274,9 +274,9 @@ func floatOp(s stack, op types.Op) stack {
 
 /*
 Logical operations
- */
+*/
 
-func bitOp(s stack, op types.Op) stack{
+func bitOp(s stack, op types.Op) stack {
 	var left datatypes.Data
 	var right datatypes.Data
 
@@ -287,7 +287,7 @@ func bitOp(s stack, op types.Op) stack{
 	}
 
 	if op == types.Not {
-		s = s.Push(datatypes.Data{Value:!right.Value.(bool),Type:datatypes.Bit})
+		s = s.Push(datatypes.Data{Value: !right.Value.(bool), Type: datatypes.Bit})
 		return s
 	}
 
@@ -308,7 +308,7 @@ func bitOp(s stack, op types.Op) stack{
 		result = left.Value.(bool) != right.Value.(bool)
 	}
 
-	s = s.Push(datatypes.Data{Value:result,Type:datatypes.Bit})
+	s = s.Push(datatypes.Data{Value: result, Type: datatypes.Bit})
 	return s
 }
 
@@ -384,7 +384,7 @@ Variable declaration
 
 func declareVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data) map[string]datatypes.Data {
 
-	addresses = append(addresses,command.Param.Text)
+	addresses = append(addresses, command.Param.Text)
 	revAddresses[command.Param.Text] = varAddress
 	varAddress++
 
@@ -486,7 +486,7 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 	case types.HexNumber:
 		num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
 	case types.Pointer:
-		val := vars[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
+		val := vars[strings.Trim(strings.Trim(command.Param.Text, "]"), "[")]
 
 		if val.Type != datatypes.Ptr {
 			panic("Variable is not of type ptr!")
@@ -494,7 +494,6 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 
 		num = int64(val.Value.(int32))
 	}
-
 
 	var v datatypes.Data
 	s, v = s.Pop()
@@ -512,7 +511,7 @@ Store
 */
 
 func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, map[string]datatypes.Data) {
-	name := getByPtr(command,v)
+	name := getByPtr(command, v)
 	d := v[name].Type
 	var t datatypes.Data
 	s, t = s.Pop()
@@ -524,8 +523,8 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 
 	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode {
 		if t.Type == datatypes.Int8 {
-			v[name] = datatypes.Data{Value:string(t.Value.(int8)),Type:v[name].Type}
-			return s,v
+			v[name] = datatypes.Data{Value: string(t.Value.(int8)), Type: v[name].Type}
+			return s, v
 		}
 	}
 
@@ -557,10 +556,10 @@ func extern(command types.Command, v map[string]datatypes.Data) map[string]datat
 	return v
 }
 
-func getByPtr(command types.Command, v map[string]datatypes.Data) string{
+func getByPtr(command types.Command, v map[string]datatypes.Data) string {
 	switch command.Param.Kind {
 	case types.Pointer:
-		ptr := v[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
+		ptr := v[strings.Trim(strings.Trim(command.Param.Text, "]"), "[")]
 
 		if ptr.Type != datatypes.Ptr {
 			panic("Variable is not of type ptr!")
@@ -577,17 +576,17 @@ func getByPtr(command types.Command, v map[string]datatypes.Data) string{
 
 func Run(root types.Root) int8 {
 	//Global var initialization
-	constants = make([]datatypes.Data,0)
+	constants = make([]datatypes.Data, 0)
 	cbase = make(map[int]int)
-	addresses = make([]string,0)
+	addresses = make([]string, 0)
 	revAddresses = make(map[string]int)
 
-	s := make(stack,0)
-	r := make(intStack,0)
+	s := make(stack, 0)
+	r := make(intStack, 0)
 	v := make(map[string]datatypes.Data)
 
 	for k := range root.Labels {
-		addresses = append(addresses,k)
+		addresses = append(addresses, k)
 		revAddresses[k] = varAddress
 		varAddress++
 	}
@@ -599,7 +598,7 @@ func Run(root types.Root) int8 {
 				s, _ = s.Pop()
 
 			/*
-			Arithmetic int operations
+				Arithmetic int operations
 			*/
 			case "add":
 				s = intOp(s, types.Add)
@@ -637,7 +636,7 @@ func Run(root types.Root) int8 {
 				s = intSingleOp(s, types.Dec)
 
 			/*
-			Arithmetic float operations
+				Arithmetic float operations
 			*/
 			case "addf":
 				s = floatOp(s, types.Add)
@@ -666,37 +665,46 @@ func Run(root types.Root) int8 {
 				s = bitOp(s, types.Not)
 
 			/*
-			Cbase
-			 */
+				Cbase
+			*/
 			case "cbase":
 				cbase[e] = len(constants)
 
 			/*
-			Return
-			 */
+				Return
+			*/
 			case "ret":
-				r,e = r.Pop()
+				r, e = r.Pop()
 
 			/*
-			TODO: string functions
-			 */
+				Concatenate
+				Can also be used to convert values to string (by concatenating a value with empty string)
+			*/
+			case "conc":
+				var left datatypes.Data
+				var right datatypes.Data
+
+				s, left = s.Pop()
+				s, right = s.Pop()
+
+				s = s.Push(datatypes.Data{Value: fmt.Sprintf("%v", left.Value) + fmt.Sprintf("%v", right.Value), Type: datatypes.String_Unicode})
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
 			/*
-			Syscall
+				Syscall
 			*/
 			case "syscall":
 				s = syscall(root.Commands[e], s, v)
 
 			/*
-			Store
+				Store
 			*/
 			case "store":
 				s, v = store(root.Commands[e], s, v)
 
 			/*
-			Jump
+				Jump
 			*/
 			case "jmp":
 				lbl := getByPtr(root.Commands[e], v)
@@ -719,21 +727,21 @@ func Run(root types.Root) int8 {
 				}
 
 			/*
-			Call
-			 */
+				Call
+			*/
 			case "call":
 				r = r.Push(e)
 				lbl := getByPtr(root.Commands[e], v)
 				e = root.Labels[lbl] - 1
 
 			/*
-			Extern
+				Extern
 			*/
 			case "extern":
 				v = extern(root.Commands[e], v)
 
 			/*
-			Declare int constant
+				Declare int constant
 			*/
 			case "dci8":
 				constants = declareIntConst(root.Commands[e], constants, datatypes.Int8)
@@ -745,7 +753,7 @@ func Run(root types.Root) int8 {
 				constants = declareIntConst(root.Commands[e], constants, datatypes.Int64)
 
 			/*
-			Declare float constant
+				Declare float constant
 			*/
 			case "dcf32", "dcf":
 				constants = declareFloatConst(root.Commands[e], constants, datatypes.Float32)
@@ -753,20 +761,20 @@ func Run(root types.Root) int8 {
 				constants = declareFloatConst(root.Commands[e], constants, datatypes.Float64)
 
 			/*
-			Declare string constant
-			This implementation of Persephone doesn't differentiate between ASCII and Unicode
+				Declare string constant
+				This implementation of Persephone doesn't differentiate between ASCII and Unicode
 			*/
 			case "dcsa", "dcsu":
 				constants = declareStringConstant(root.Commands[e], constants)
 
 			/*
-			Declare bit constant
+				Declare bit constant
 			*/
 			case "dcb":
 				constants = declareBitConstant(root.Commands[e], constants)
 
 			/*
-			Variable creation
+				Variable creation
 			*/
 			case "v_int8":
 				v = declareVar(root.Commands[e], datatypes.Int8, v)
@@ -790,7 +798,7 @@ func Run(root types.Root) int8 {
 				v = declareVar(root.Commands[e], datatypes.Ptr, v)
 
 			/*
-			Load variable onto stack
+				Load variable onto stack
 			*/
 			case "ldi8v":
 				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
@@ -814,7 +822,7 @@ func Run(root types.Root) int8 {
 				s = loadVar(root.Commands[e], datatypes.Ptr, v, s)
 
 			/*
-			Load constant onto stack
+				Load constant onto stack
 			*/
 			case "ldi8c":
 				s = loadConst(root.Commands[e], datatypes.Int8, constants, s, e)
@@ -836,7 +844,7 @@ func Run(root types.Root) int8 {
 				s = loadConst(root.Commands[e], datatypes.Bit, constants, s, e)
 
 			case "ldptr":
-				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
+				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]), Type: datatypes.Ptr})
 			}
 		}
 	}
