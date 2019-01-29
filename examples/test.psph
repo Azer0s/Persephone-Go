@@ -1,7 +1,8 @@
+%include fib.psph
+cbase
+
 dci32 4
 dci32 16
-
-%include fib.psph
 
 %region Array1
 
@@ -27,6 +28,7 @@ add
 
 syscall 0x01
 
+cbase
 dcsa "Hello world"
-ldsac 2
+ldsac 0
 syscall 0x01

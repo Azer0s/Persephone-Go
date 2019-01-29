@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec"}
+var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase"}
 var functionCommands = []string{"put","ret"}
 
 var tokens []types.Token

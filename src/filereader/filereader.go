@@ -37,8 +37,7 @@ func ReadFile(filename, workdir string) (code []string){
 		if include.MatchString(code[e]) {
 			tempLines := code[e+1:]
 			newFileLines := ReadFile(filepath.Join(workdir, include.ReplaceAllString(code[e],"$1")), workdir)
-			code = append(code[:e], newFileLines...)
-			code = append(code, tempLines...)
+			code = append(code[:e], append(newFileLines,tempLines...)...)
 		}
 	}
 

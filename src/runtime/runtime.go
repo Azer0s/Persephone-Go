@@ -13,6 +13,7 @@ type stack []datatypes.Data
 var varAddress int = 0
 var addresses []string
 var revAddresses map[string]int
+var cbase map[int]int
 
 func (s stack) Push(v datatypes.Data) stack {
 	return append(s, v)
@@ -393,8 +394,18 @@ func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes
 	return nil
 }
 
-func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, s stack) stack {
+func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, s stack, line int) stack {
 	index, _ := strconv.Atoi(command.Param.Text)
+
+	min := 0
+	for e := range cbase {
+		if e < line {
+			min = e
+		}
+	}
+
+	index += cbase[min]
+
 	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && c[index].Type >= datatypes.String_ASCII && c[index].Type <= datatypes.String_Unicode {
 		s = s.Push(c[index])
 		return s
@@ -506,6 +517,7 @@ func Run(root types.Root) int8 {
 
 	var c []datatypes.Data
 	v := make(map[string]datatypes.Data)
+	cbase = make(map[int]int)
 
 	for e := 0; e < len(root.Commands); e++ {
 		if root.Commands[e].Single {
@@ -570,6 +582,12 @@ func Run(root types.Root) int8 {
 				s = floatOp(s, types.G)
 			case "ltf":
 				s = floatOp(s, types.L)
+
+			/*
+			Cbase
+			 */
+			case "cbase":
+				cbase[e] = len(c)
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
@@ -709,23 +727,23 @@ func Run(root types.Root) int8 {
 				Load constant onto stack
 			*/
 			case "ldi8c":
-				s = loadConst(root.Commands[e], datatypes.Int8, c, s)
+				s = loadConst(root.Commands[e], datatypes.Int8, c, s, e)
 			case "ldi16c":
-				s = loadConst(root.Commands[e], datatypes.Int16, c, s)
+				s = loadConst(root.Commands[e], datatypes.Int16, c, s, e)
 			case "ldi32c", "ldic":
-				s = loadConst(root.Commands[e], datatypes.Int32, c, s)
+				s = loadConst(root.Commands[e], datatypes.Int32, c, s, e)
 			case "ldi64c":
-				s = loadConst(root.Commands[e], datatypes.Int64, c, s)
+				s = loadConst(root.Commands[e], datatypes.Int64, c, s, e)
 			case "ldf32c", "ldfc":
-				s = loadConst(root.Commands[e], datatypes.Float32, c, s)
+				s = loadConst(root.Commands[e], datatypes.Float32, c, s, e)
 			case "ldf64c", "lddc":
-				s = loadConst(root.Commands[e], datatypes.Float64, c, s)
+				s = loadConst(root.Commands[e], datatypes.Float64, c, s, e)
 			case "ldsac":
-				s = loadConst(root.Commands[e], datatypes.String_ASCII, c, s)
+				s = loadConst(root.Commands[e], datatypes.String_ASCII, c, s, e)
 			case "ldsuc":
-				s = loadConst(root.Commands[e], datatypes.String_Unicode, c, s)
+				s = loadConst(root.Commands[e], datatypes.String_Unicode, c, s, e)
 			case "ldbc":
-				s = loadConst(root.Commands[e], datatypes.Bit, c, s)
+				s = loadConst(root.Commands[e], datatypes.Bit, c, s, e)
 
 			case "ldptr":
 				s = s.Push(datatypes.Data{Value:int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
