@@ -669,6 +669,7 @@ func Run(root types.Root) int8 {
 			switch root.Commands[e].Command.Text {
 			/*
 			Syscall
+			TODO: Pointers
 			*/
 			case "syscall":
 				s = syscall(root.Commands[e], s)
@@ -776,6 +777,7 @@ func Run(root types.Root) int8 {
 
 			/*
 			Load variable onto stack
+			TODO: pointer
 			*/
 			case "ldi8v":
 				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
