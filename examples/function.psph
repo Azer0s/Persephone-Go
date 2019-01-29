@@ -1,0 +1,29 @@
+dcsa "Bar"
+dci32 42
+
+v_int32 status
+v_stringa text
+
+call return_status_and_text
+
+store text
+store status
+
+# status and text now have values returned by function_that_returns_status_and_text
+
+ldsav text
+syscall 0x01
+
+ldi32v status
+syscall 0x01
+
+jmp exit
+
+return_status_and_text:
+
+    ldi32c 1
+    ldsac 0
+
+    ret
+
+exit:
