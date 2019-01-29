@@ -713,7 +713,7 @@ func Run(root types.Root) int8 {
 			String functions
 			 */
 			case "len":
-				a1 := v[root.Commands[e].Param.Text]
+				a1 := v[getByPtr(root.Commands[e],v)]
 
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
 					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type:datatypes.Int32})
@@ -722,7 +722,7 @@ func Run(root types.Root) int8 {
 				}
 
 			case "getc":
-				a1 := v[root.Commands[e].Param.Text]
+				a1 := v[getByPtr(root.Commands[e],v)]
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
 					var val datatypes.Data
 					s, val = s.Pop()
@@ -732,7 +732,7 @@ func Run(root types.Root) int8 {
 				}
 
 			case "setc":
-				a1 := v[root.Commands[e].Param.Text]
+				a1 := v[getByPtr(root.Commands[e],v)]
 				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
 					var char datatypes.Data
 					s, char = s.Pop()

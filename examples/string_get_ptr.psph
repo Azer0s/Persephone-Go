@@ -1,0 +1,16 @@
+v_stringa h
+dcsa "Foo"
+ldsac 0
+store h
+
+dci8 0
+ldi8c 1
+
+v_ptr h_ptr
+ldptr h
+store h_ptr
+
+dci8 1
+ldi8c 1
+getc [h_ptr]
+syscall 0x01
