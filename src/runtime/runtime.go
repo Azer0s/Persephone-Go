@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+func replaceAtIndex(in string, r rune, i int) string {
+	out := []rune(in)
+	out[i] = r
+	return string(out)
+}
+
 type stack []datatypes.Data
 type intStack []int
 
@@ -703,6 +709,9 @@ func Run(root types.Root) int8 {
 			case "store":
 				s, v = store(root.Commands[e], s, v)
 
+			/*
+			String functions
+			 */
 			case "len":
 				a1 := v[root.Commands[e].Param.Text]
 
@@ -711,7 +720,39 @@ func Run(root types.Root) int8 {
 				}else{
 					panic("Value is not of type stringa or stringu!")
 				}
-				
+
+			case "getc":
+				a1 := v[root.Commands[e].Param.Text]
+				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+					var val datatypes.Data
+					s, val = s.Pop()
+					s = s.Push(datatypes.Data{Value: int8(a1.Value.(string)[getInt64(val)]), Type:datatypes.Int8})
+				}else{
+					panic("Value is not of type stringa or stringu!")
+				}
+
+			case "setc":
+				a1 := v[root.Commands[e].Param.Text]
+				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+					var char datatypes.Data
+					s, char = s.Pop()
+
+					var pos datatypes.Data
+					s, pos = s.Pop()
+
+					if char.Type != datatypes.Int8 {
+						panic("Value is not of type int8!")
+					}
+
+					tempVal := a1.Value.(string)
+					tempVal = replaceAtIndex(tempVal,rune(char.Value.(int8)),int(getInt64(pos)))
+					a1.Value = tempVal
+
+					s = s.Push(datatypes.Data{Value: tempVal, Type:datatypes.String_Unicode})
+				}else{
+					panic("Value is not of type stringa or stringu!")
+				}
+
 			/*
 				Jump
 			*/

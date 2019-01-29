@@ -1,0 +1,13 @@
+v_stringa h
+dcsa "Foo"
+ldsac 0
+store h
+
+dci8 0
+ldi8c 1
+
+dci8 65
+ldi8c 2
+
+setc h
+syscall 0x01
