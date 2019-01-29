@@ -12,7 +12,7 @@ import (
 
 func main() { os.Exit(mainReturnWithCode()) }
 
-func mainReturnWithCode() int{
+func mainReturnWithCode() int {
 	filename, workdir := configuration.GetConfig(os.Args[1:])
 
 	if filename == "" || workdir == "" {
