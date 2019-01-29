@@ -120,8 +120,7 @@ func intOp(s stack, op types.Op) stack {
 	s, a1 = s.Pop()
 
 	if !(a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Int64 && a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Int64) {
-		fmt.Println("Only int or ptr allowed in int operations!")
-		return nil
+		panic("Variable is not of type int or ptr!")
 	}
 
 	min := a1.Type
@@ -197,8 +196,7 @@ func intSingleOp(s stack, op types.Op) stack {
 	s, opv = s.Pop()
 
 	if !(opv.Type >= datatypes.Ptr && opv.Type <= datatypes.Int64) {
-		fmt.Println("Only int or bit allowed in negate operation!")
-		return nil
+		panic("Value is not of type int or bit!")
 	}
 
 	opInt := getInt64(opv)
@@ -234,8 +232,7 @@ func floatOp(s stack, op types.Op) stack {
 	s, a1 = s.Pop()
 
 	if !(a1.Type >= datatypes.Float32 && a1.Type <= datatypes.Float64 && a2.Type >= datatypes.Float32 && a2.Type <= datatypes.Float64) {
-		fmt.Println("Only float allowed in float operations!")
-		return nil
+		panic("Value is not of type float!")
 	}
 
 	min := a1.Type
@@ -286,8 +283,7 @@ func bitOp(s stack, op types.Op) stack{
 	s, right = s.Pop()
 
 	if right.Type != datatypes.Bit {
-		fmt.Println("Only bit allowed in bit operations!")
-		return nil
+		panic("Value is not of type bit!")
 	}
 
 	if op == types.Not {
@@ -296,8 +292,7 @@ func bitOp(s stack, op types.Op) stack{
 	}
 
 	if left.Type != datatypes.Bit {
-		fmt.Println("Only bit allowed in bit operations!")
-		return nil
+		panic("Value is not of type bit!")
 	}
 
 	s, left = s.Pop()
@@ -376,8 +371,7 @@ func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.D
 	case "1":
 		val = true
 	default:
-		fmt.Println("Error, expected a bit value, received: " + command.Param.Text + "!")
-		return nil
+		panic("Value is not of type bit!")
 	}
 
 	c = append(c, datatypes.Data{Value: val, Type: datatypes.Bit})
@@ -445,8 +439,7 @@ func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes
 		return s
 	}
 
-	fmt.Println("Type mismatch!")
-	return nil
+	panic("Type mismatch!")
 }
 
 func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, s stack, line int) stack {
@@ -479,8 +472,7 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 		return s
 	}
 
-	fmt.Println("Type mismatch!")
-	return nil
+	panic("Type mismatch!")
 }
 
 /*
@@ -497,8 +489,7 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 		val := vars[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
 
 		if val.Type != datatypes.Ptr {
-			fmt.Println("Variable is not a pointer!")
-			return nil
+			panic("Variable is not of type ptr!")
 		}
 
 		num = int64(val.Value.(int32))
@@ -551,8 +542,7 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 		return s, v
 	}
 
-	fmt.Println("Type mismatch!")
-	return nil, nil
+	panic("Type mismatch!")
 }
 
 /*
@@ -573,8 +563,7 @@ func getByPtr(command types.Command, v map[string]datatypes.Data) string{
 		ptr := v[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
 
 		if ptr.Type != datatypes.Ptr {
-			fmt.Println("Variable is not a pointer!")
-			return ""
+			panic("Variable is not of type ptr!")
 		}
 
 		return addresses[ptr.Value.(int32)]
