@@ -1,8 +1,12 @@
 dcsa "Hello world"
 
-print {
+jmp skp_print
+
+print:
     syscall 0x01
-}
+    ret
+
+skp_print:
 
 v_ptr print_ptr
 ldptr print # loads the function ptr

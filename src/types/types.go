@@ -38,8 +38,6 @@ const(
 	HexNumber Kind = "hexnum"
 	Float Kind = "float"
 	Pointer Kind = "pointer"
-	Lbrace Kind = "lbrace"
-	Rbrace Kind = "rbrace"
 	Label Kind = "label"
 	Unknown Kind = "unknown"
 )
@@ -50,7 +48,6 @@ type Token struct {
 }
 
 type Root struct{
-	Functions map[string]Function
 	Commands []Command
 	Labels map[string]int
 }

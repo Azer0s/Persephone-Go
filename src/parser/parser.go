@@ -5,8 +5,7 @@ import (
 	"fmt"
 )
 
-var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase", "and","or","xor","not"}
-var functionCommands = []string{"put","ret"}
+var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase", "and","or","xor","not", "ret"}
 
 var tokens []types.Token
 var index int
@@ -20,26 +19,16 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func parseStatement(function bool) (command types.Command){
+func parseStatement() (command types.Command){
 	if tokens[index].Kind == types.Name {
 
 		hasNoArgsCommands := contains(noArgCommands,tokens[index].Text)
-		hasFunctionCommands := contains(functionCommands,tokens[index].Text)
 
-		if hasNoArgsCommands || hasFunctionCommands {
+		if hasNoArgsCommands {
 			command.Single = true
 			command.Command = tokens[index]
 			if hasNoArgsCommands {
 				return
-			}
-
-			if hasFunctionCommands {
-				if function {
-					return
-				}else {
-					fmt.Println("put or ret can only be used in functions!")
-					return types.Command{}
-				}
 			}
 		}
 
@@ -60,37 +49,16 @@ func parseStatement(function bool) (command types.Command){
 	}
 }
 
-func getNextToken() types.Token{
-	if len(tokens) == index+1 {
-		return types.Token{Kind:types.Unknown,Text:""}
-	}else{
-		return tokens[index+1]
-	}
-}
-
 func Parse (tks []types.Token) (root types.Root){
 	tokens = tks
 	index = 0
 	root.Labels = make(map[string]int)
-	root.Functions = make(map[string]types.Function)
 
 	for index = 0; index < len(tokens); index++{
-		if tokens[index].Kind == types.Name && getNextToken().Kind == types.Lbrace {
-			fn := types.Function{}
-			fn.Name = tokens[index]
-			index++
-			index++
-
-			for tokens[index].Kind != types.Rbrace {
-				fn.Commands = append(fn.Commands, parseStatement(true))
-				index++
-			}
-
-			root.Functions[fn.Name.Text] = fn
-		}else if tokens[index].Kind == types.Label{
+		if tokens[index].Kind == types.Label{
 			root.Labels[tokens[index].Text] = len(root.Commands)
 		}else{
-			root.Commands = append(root.Commands, parseStatement(false))
+			root.Commands = append(root.Commands, parseStatement())
 		}
 	}
 

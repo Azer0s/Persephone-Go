@@ -35,7 +35,7 @@ func Lex(lines []string) (tokens []types.Token){
 	isNumber := regexp.MustCompile("[0-9]")
 
 	for index = 0; index < len(code); index++ {
-		if letter() == " "{
+		if letter() == " " || letter() == "\t"{
 			continue
 		}
 
@@ -75,12 +75,6 @@ func Lex(lines []string) (tokens []types.Token){
 					consume()
 				}
 			}
-		}else if letter() == "{"{
-			current.Kind = types.Lbrace
-			current.Text = "{"
-		}else if letter() == "}"{
-			current.Kind = types.Rbrace
-			current.Text = "}"
 		}else if letter() == "["{
 			current.Kind = types.Pointer
 			consume()

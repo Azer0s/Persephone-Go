@@ -9,14 +9,22 @@ import (
 )
 
 type stack []datatypes.Data
+type intStack []int
 
 var varAddress int = 0
 var addresses []string
 var revAddresses map[string]int
 var cbase map[int]int
 var constants []datatypes.Data
-var stacks stack
-var variables map[string]datatypes.Data
+
+func (s intStack) Push(v int) intStack {
+	return append(s, v)
+}
+
+func (s intStack) Pop() (intStack, int) {
+	l := len(s)
+	return s[:l-1], s[l-1]
+}
 
 func (s stack) Push(v datatypes.Data) stack {
 	return append(s, v)
@@ -493,14 +501,6 @@ func syscall(command types.Command, s stack) stack {
 }
 
 /*
-Syscall
-*/
-
-func call(command types.Command, s stack) stack {
-	return s
-}
-
-/*
 Store
 */
 
@@ -549,16 +549,12 @@ func Run(root types.Root) int8 {
 	cbase = make(map[int]int)
 	addresses = make([]string,0)
 	revAddresses = make(map[string]int)
-	stacks = make(stack,0)
+
+	s := make(stack,0)
+	r := make(intStack,0)
 	v := make(map[string]datatypes.Data)
 
 	for k := range root.Labels {
-		addresses = append(addresses,k)
-		revAddresses[k] = varAddress
-		varAddress++
-	}
-
-	for k := range root.Functions {
 		addresses = append(addresses,k)
 		revAddresses[k] = varAddress
 		varAddress++
@@ -568,114 +564,113 @@ func Run(root types.Root) int8 {
 		if root.Commands[e].Single {
 			switch root.Commands[e].Command.Text {
 			case "pop":
-				stacks, _ = stacks.Pop()
+				s, _ = s.Pop()
 
 			/*
-				Arithmetic int operations
+			Arithmetic int operations
 			*/
 			case "add":
-				stacks = intOp(stacks, types.Add)
+				s = intOp(s, types.Add)
 			case "sub":
-				stacks = intOp(stacks, types.Sub)
+				s = intOp(s, types.Sub)
 			case "mul":
-				stacks = intOp(stacks, types.Mul)
+				s = intOp(s, types.Mul)
 			case "div":
-				stacks = intOp(stacks, types.Div)
+				s = intOp(s, types.Div)
 			case "mod":
-				stacks = intOp(stacks, types.Mod)
+				s = intOp(s, types.Mod)
 			case "andi":
-				stacks = intOp(stacks, types.And)
+				s = intOp(s, types.And)
 			case "ori":
-				stacks = intOp(stacks, types.Or)
+				s = intOp(s, types.Or)
 			case "xori":
-				stacks = intOp(stacks, types.Xor)
+				s = intOp(s, types.Xor)
 			case "noti":
-				stacks = intSingleOp(stacks, types.Not)
+				s = intSingleOp(s, types.Not)
 			case "shl":
-				stacks = intOp(stacks, types.Shl)
+				s = intOp(s, types.Shl)
 			case "shr":
-				stacks = intOp(stacks, types.Shr)
+				s = intOp(s, types.Shr)
 			case "ge":
-				stacks = intOp(stacks, types.Ge)
+				s = intOp(s, types.Ge)
 			case "le":
-				stacks = intOp(stacks, types.Le)
+				s = intOp(s, types.Le)
 			case "gt":
-				stacks = intOp(stacks, types.G)
+				s = intOp(s, types.G)
 			case "lt":
-				stacks = intOp(stacks, types.L)
+				s = intOp(s, types.L)
 			case "inc":
-				stacks = intSingleOp(stacks, types.Inc)
+				s = intSingleOp(s, types.Inc)
 			case "dec":
-				stacks = intSingleOp(stacks, types.Dec)
+				s = intSingleOp(s, types.Dec)
 
 			/*
-				Arithmetic float operations
+			Arithmetic float operations
 			*/
 			case "addf":
-				stacks = floatOp(stacks, types.Add)
+				s = floatOp(s, types.Add)
 			case "subf":
-				stacks = floatOp(stacks, types.Sub)
+				s = floatOp(s, types.Sub)
 			case "mulf":
-				stacks = floatOp(stacks, types.Mul)
+				s = floatOp(s, types.Mul)
 			case "divf":
-				stacks = floatOp(stacks, types.Div)
+				s = floatOp(s, types.Div)
 			case "gef":
-				stacks = floatOp(stacks, types.Ge)
+				s = floatOp(s, types.Ge)
 			case "lef":
-				stacks = floatOp(stacks, types.Le)
+				s = floatOp(s, types.Le)
 			case "gtf":
-				stacks = floatOp(stacks, types.G)
+				s = floatOp(s, types.G)
 			case "ltf":
-				stacks = floatOp(stacks, types.L)
+				s = floatOp(s, types.L)
 
 			case "and":
-				stacks = bitOp(stacks, types.And)
+				s = bitOp(s, types.And)
 			case "or":
-				stacks = bitOp(stacks, types.Or)
+				s = bitOp(s, types.Or)
 			case "xor":
-				stacks = bitOp(stacks, types.Xor)
+				s = bitOp(s, types.Xor)
 			case "not":
-				stacks = bitOp(stacks, types.Not)
+				s = bitOp(s, types.Not)
 
 			/*
 			Cbase
 			 */
 			case "cbase":
 				cbase[e] = len(constants)
+
+			/*
+			Return
+			 */
+			case "ret":
+				r,e = r.Pop()
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
 			/*
-				Syscall
-				TODO: Pointers, num values, functions
+			Syscall
+			TODO: Pointers, num values, functions
 			*/
 			case "syscall":
-				stacks = syscall(root.Commands[e], stacks)
+				s = syscall(root.Commands[e], s)
 
 			/*
-				Call
-				TODO: Pointers, num values, functions
-			*/
-			case "call":
-				stacks = call(root.Commands[e], stacks)
-
-			/*
-				Store
-				TODO: Pointers, num values
+			Store
+			TODO: Pointers, num values
 			*/
 			case "store":
-				stacks, v = store(root.Commands[e], stacks, v)
+				s, v = store(root.Commands[e], s, v)
 
 			/*
-				Jump
-				TODO: Pointers, num values
+			Jump
+			TODO: Pointers, num values
 			*/
 			case "jmp":
 				lbl := root.Commands[e].Param.Text
 				e = root.Labels[lbl] - 1
 			case "jmpt":
 				var val datatypes.Data
-				stacks, val = stacks.Pop()
+				s, val = s.Pop()
 
 				if val.Value.(bool) {
 					lbl := root.Commands[e].Param.Text
@@ -683,7 +678,7 @@ func Run(root types.Root) int8 {
 				}
 			case "jmpf":
 				var val datatypes.Data
-				stacks, val = stacks.Pop()
+				s, val = s.Pop()
 
 				if !val.Value.(bool) {
 					lbl := root.Commands[e].Param.Text
@@ -691,13 +686,21 @@ func Run(root types.Root) int8 {
 				}
 
 			/*
-				Extern
+			Call
+			 */
+			case "call":
+				r = r.Push(e)
+				lbl := root.Commands[e].Param.Text
+				e = root.Labels[lbl] - 1
+
+			/*
+			Extern
 			*/
 			case "extern":
 				v = extern(root.Commands[e], v)
 
 			/*
-				Declare int constant
+			Declare int constant
 			*/
 			case "dci8":
 				constants = declareIntConst(root.Commands[e], constants, datatypes.Int8)
@@ -709,7 +712,7 @@ func Run(root types.Root) int8 {
 				constants = declareIntConst(root.Commands[e], constants, datatypes.Int64)
 
 			/*
-				Declare float constant
+			Declare float constant
 			*/
 			case "dcf32", "dcf":
 				constants = declareFloatConst(root.Commands[e], constants, datatypes.Float32)
@@ -717,20 +720,20 @@ func Run(root types.Root) int8 {
 				constants = declareFloatConst(root.Commands[e], constants, datatypes.Float64)
 
 			/*
-				Declare string constant
-				This implementation of Persephone doesn't differentiate between ASCII and Unicode
+			Declare string constant
+			This implementation of Persephone doesn't differentiate between ASCII and Unicode
 			*/
 			case "dcsa", "dcsu":
 				constants = declareStringConstant(root.Commands[e], constants)
 
 			/*
-				Declare bit constant
+			Declare bit constant
 			*/
 			case "dcb":
 				constants = declareBitConstant(root.Commands[e], constants)
 
 			/*
-				Variable creation
+			Variable creation
 			*/
 			case "v_int8":
 				v = declareVar(root.Commands[e], datatypes.Int8, v)
@@ -754,53 +757,53 @@ func Run(root types.Root) int8 {
 				v = declareVar(root.Commands[e], datatypes.Ptr, v)
 
 			/*
-				Load variable onto stack
+			Load variable onto stack
 			*/
 			case "ldi8v":
-				stacks = loadVar(root.Commands[e], datatypes.Int8, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
 			case "ldi16v":
-				stacks = loadVar(root.Commands[e], datatypes.Int16, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Int16, v, s)
 			case "ldi32v", "ldiv":
-				stacks = loadVar(root.Commands[e], datatypes.Int32, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Int32, v, s)
 			case "ldi64v":
-				stacks = loadVar(root.Commands[e], datatypes.Int64, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Int64, v, s)
 			case "ldf32v", "ldfv":
-				stacks = loadVar(root.Commands[e], datatypes.Float32, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Float32, v, s)
 			case "ldf64v", "lddv":
-				stacks = loadVar(root.Commands[e], datatypes.Float64, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Float64, v, s)
 			case "ldsav":
-				stacks = loadVar(root.Commands[e], datatypes.String_ASCII, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.String_ASCII, v, s)
 			case "ldsuv":
-				stacks = loadVar(root.Commands[e], datatypes.String_Unicode, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.String_Unicode, v, s)
 			case "ldbv":
-				stacks = loadVar(root.Commands[e], datatypes.Bit, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Bit, v, s)
 			case "ldptrv":
-				stacks = loadVar(root.Commands[e], datatypes.Ptr, v, stacks)
+				s = loadVar(root.Commands[e], datatypes.Ptr, v, s)
 
 			/*
-				Load constant onto stack
+			Load constant onto stack
 			*/
 			case "ldi8c":
-				stacks = loadConst(root.Commands[e], datatypes.Int8, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Int8, constants, s, e)
 			case "ldi16c":
-				stacks = loadConst(root.Commands[e], datatypes.Int16, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Int16, constants, s, e)
 			case "ldi32c", "ldic":
-				stacks = loadConst(root.Commands[e], datatypes.Int32, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Int32, constants, s, e)
 			case "ldi64c":
-				stacks = loadConst(root.Commands[e], datatypes.Int64, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Int64, constants, s, e)
 			case "ldf32c", "ldfc":
-				stacks = loadConst(root.Commands[e], datatypes.Float32, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Float32, constants, s, e)
 			case "ldf64c", "lddc":
-				stacks = loadConst(root.Commands[e], datatypes.Float64, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Float64, constants, s, e)
 			case "ldsac":
-				stacks = loadConst(root.Commands[e], datatypes.String_ASCII, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.String_ASCII, constants, s, e)
 			case "ldsuc":
-				stacks = loadConst(root.Commands[e], datatypes.String_Unicode, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.String_Unicode, constants, s, e)
 			case "ldbc":
-				stacks = loadConst(root.Commands[e], datatypes.Bit, constants, stacks, e)
+				s = loadConst(root.Commands[e], datatypes.Bit, constants, s, e)
 
 			case "ldptr":
-				stacks = stacks.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
+				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
 				//TODO: string functions, prepare variables
 			}
 		}
