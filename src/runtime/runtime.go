@@ -543,6 +543,26 @@ func extern(command types.Command, v map[string]datatypes.Data) map[string]datat
 	return v
 }
 
+func getLabel(command types.Command, v map[string]datatypes.Data) string{
+	switch command.Param.Kind {
+	case types.HexNumber:
+	case types.Pointer:
+		ptr := v[strings.Trim(strings.Trim(command.Param.Text,"]"),"[")]
+
+		if ptr.Type != datatypes.Ptr {
+			fmt.Println("Variable is not a pointer!")
+			return ""
+		}
+
+		return addresses[ptr.Value.(int32)]
+
+	case types.Name:
+		return command.Param.Text
+	}
+
+	return ""
+}
+
 func Run(root types.Root) int8 {
 	//Global var initialization
 	constants = make([]datatypes.Data,0)
@@ -649,31 +669,29 @@ func Run(root types.Root) int8 {
 			switch root.Commands[e].Command.Text {
 			/*
 			Syscall
-			TODO: Pointers, num values, functions
 			*/
 			case "syscall":
 				s = syscall(root.Commands[e], s)
 
 			/*
 			Store
-			TODO: Pointers, num values
+			TODO: Pointers
 			*/
 			case "store":
 				s, v = store(root.Commands[e], s, v)
 
 			/*
 			Jump
-			TODO: Pointers, num values
 			*/
 			case "jmp":
-				lbl := root.Commands[e].Param.Text
+				lbl := getLabel(root.Commands[e], v)
 				e = root.Labels[lbl] - 1
 			case "jmpt":
 				var val datatypes.Data
 				s, val = s.Pop()
 
 				if val.Value.(bool) {
-					lbl := root.Commands[e].Param.Text
+					lbl := getLabel(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
 			case "jmpf":
@@ -681,7 +699,7 @@ func Run(root types.Root) int8 {
 				s, val = s.Pop()
 
 				if !val.Value.(bool) {
-					lbl := root.Commands[e].Param.Text
+					lbl := getLabel(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
 
@@ -690,7 +708,7 @@ func Run(root types.Root) int8 {
 			 */
 			case "call":
 				r = r.Push(e)
-				lbl := root.Commands[e].Param.Text
+				lbl := getLabel(root.Commands[e], v)
 				e = root.Labels[lbl] - 1
 
 			/*
@@ -804,7 +822,7 @@ func Run(root types.Root) int8 {
 
 			case "ldptr":
 				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]),Type:datatypes.Ptr})
-				//TODO: string functions, prepare variables
+				//TODO: string functions
 			}
 		}
 	}
