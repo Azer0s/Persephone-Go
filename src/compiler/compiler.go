@@ -108,7 +108,7 @@ func Compile(root types.Root, outname string) int{
 	defer f.Close()
 
 	for e := 0; e < len(root.Commands); e++ {
-		//isJmp := false
+		isJmp := false
 
 		switch root.Commands[e].Command.Text {
 		case "call","jmp","jmpt","jmpf":
@@ -123,11 +123,13 @@ func Compile(root types.Root, outname string) int{
 			panic(err)
 		}
 
+		if isJmp && root.Commands[e].Param.Kind == types.Name{
+			//Label name -> int64
+		}else{
+			switch root.Commands[e].Param.Kind {
 
-		switch root.Commands[e].Param.Kind {
-
+			}
 		}
-		
 	}
 
 	return 0
