@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./compiler"
 	"./configuration"
 	"./filereader"
 	"./lexer"
@@ -13,7 +14,7 @@ import (
 func main() { os.Exit(mainReturnWithCode()) }
 
 func mainReturnWithCode() int {
-	filename, workdir := configuration.GetConfig(os.Args[1:])
+	filename, workdir, compile := configuration.GetConfig(os.Args[1:])
 
 	if filename == "" || workdir == "" {
 		fmt.Println("Invalid parameters!")
@@ -26,5 +27,10 @@ func mainReturnWithCode() int {
 	code := filereader.ReadFile(filename, workdir)
 	commands := lexer.Lex(code)
 	root := parser.Parse(commands)
-	return int(runtime.Run(root))
+
+	if compile {
+		return int(compiler.Compile(root))
+	}else{
+		return int(runtime.Run(root))
+	}
 }
