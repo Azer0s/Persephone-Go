@@ -108,7 +108,7 @@ func Compile(root types.Root, outname string) int{
 	defer f.Close()
 
 	for e := 0; e < len(root.Commands); e++ {
-		isJmp := false
+		//isJmp := false
 
 		switch root.Commands[e].Command.Text {
 		case "call","jmp","jmpt","jmpf":
