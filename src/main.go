@@ -14,7 +14,7 @@ import (
 func main() { os.Exit(mainReturnWithCode()) }
 
 func mainReturnWithCode() int {
-	filename, workdir, compile := configuration.GetConfig(os.Args[1:])
+	filename, workdir, out, compile := configuration.GetConfig(os.Args[1:])
 
 	if filename == "" || workdir == "" {
 		fmt.Println("Invalid parameters!")
@@ -29,8 +29,8 @@ func mainReturnWithCode() int {
 	root := parser.Parse(commands)
 
 	if compile {
-		return int(compiler.Compile(root))
-	}else{
+		return int(compiler.Compile(root, out))
+	} else {
 		return int(runtime.Run(root))
 	}
 }

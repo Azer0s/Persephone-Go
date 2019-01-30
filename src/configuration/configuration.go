@@ -4,18 +4,19 @@ import (
 	"path/filepath"
 )
 
-func GetConfig(args []string) (file, workdir string, compile bool) {
+func GetConfig(args []string) (file, workdir, out string, compile bool) {
 
 	for k, v := range args {
 		switch v {
 		case "--workdir":
 			workdir = args[k+1]
 
-		case "-i","--input":
+		case "-i", "--input":
 			file = args[k+1]
 
 		case "--compile", "-c":
 			compile = true
+			out = args[k+1]
 		}
 	}
 
