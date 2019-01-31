@@ -17,7 +17,7 @@ func replaceAtIndex(in string, r rune, i int) string {
 type stack []datatypes.Data
 type intStack []int
 
-var varAddress int = 0
+var varAddress = 0
 var addresses []string
 var revAddresses map[string]int
 var cbase map[int]int
@@ -359,9 +359,9 @@ func declareStringConstant(command types.Command, c []datatypes.Data) []datatype
 	var stringtype datatypes.DataType
 
 	if command.Command.Text == "dcsa" {
-		stringtype = datatypes.String_ASCII
+		stringtype = datatypes.StringASCII
 	} else {
-		stringtype = datatypes.String_Unicode
+		stringtype = datatypes.StringUnicode
 	}
 
 	c = append(c, datatypes.Data{Value: val, Type: stringtype})
@@ -411,10 +411,10 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 		v[command.Param.Text] = datatypes.Data{Value: float32(0), Type: datatypes.Float32}
 	case datatypes.Float64:
 		v[command.Param.Text] = datatypes.Data{Value: float64(0), Type: datatypes.Float64}
-	case datatypes.String_ASCII:
-		v[command.Param.Text] = datatypes.Data{Value: "", Type: datatypes.String_ASCII}
-	case datatypes.String_Unicode:
-		v[command.Param.Text] = datatypes.Data{Value: "", Type: datatypes.String_Unicode}
+	case datatypes.StringASCII:
+		v[command.Param.Text] = datatypes.Data{Value: "", Type: datatypes.StringASCII}
+	case datatypes.StringUnicode:
+		v[command.Param.Text] = datatypes.Data{Value: "", Type: datatypes.StringUnicode}
 	}
 
 	return v
@@ -427,7 +427,7 @@ Load value on stack
 func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack {
 	name := getByPtr(command, v)
 
-	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && v[name].Type >= datatypes.String_ASCII && v[name].Type <= datatypes.String_Unicode {
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && v[name].Type >= datatypes.StringASCII && v[name].Type <= datatypes.StringUnicode {
 		s = s.Push(v[name])
 		return s
 	}
@@ -460,7 +460,7 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 
 	index += cbase[min]
 
-	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && c[index].Type >= datatypes.String_ASCII && c[index].Type <= datatypes.String_Unicode {
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && c[index].Type >= datatypes.StringASCII && c[index].Type <= datatypes.StringUnicode {
 		s = s.Push(c[index])
 		return s
 	}
@@ -522,12 +522,12 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 	var t datatypes.Data
 	s, t = s.Pop()
 
-	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode && t.Type >= datatypes.String_ASCII && t.Type <= datatypes.String_Unicode {
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode {
 		v[name] = t
 		return s, v
 	}
 
-	if d >= datatypes.String_ASCII && d <= datatypes.String_Unicode {
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode {
 		if t.Type == datatypes.Int8 {
 			v[name] = datatypes.Data{Value: string(t.Value.(int8)), Type: v[name].Type}
 			return s, v
@@ -580,6 +580,7 @@ func getByPtr(command types.Command, v map[string]datatypes.Data) string {
 	return ""
 }
 
+// Walks the AST and basically executes the program "line-by-line"
 func Run(root types.Root) int8 {
 	//Global var initialization
 	constants = make([]datatypes.Data, 0)
@@ -693,7 +694,7 @@ func Run(root types.Root) int8 {
 				s, left = s.Pop()
 				s, right = s.Pop()
 
-				s = s.Push(datatypes.Data{Value: fmt.Sprintf("%v", left.Value) + fmt.Sprintf("%v", right.Value), Type: datatypes.String_Unicode})
+				s = s.Push(datatypes.Data{Value: fmt.Sprintf("%v", left.Value) + fmt.Sprintf("%v", right.Value), Type: datatypes.StringUnicode})
 			}
 		} else {
 			switch root.Commands[e].Command.Text {
@@ -715,7 +716,7 @@ func Run(root types.Root) int8 {
 			case "len":
 				a1 := v[getByPtr(root.Commands[e], v)]
 
-				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
 					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type: datatypes.Int32})
 				} else {
 					panic("Value is not of type stringa or stringu!")
@@ -723,7 +724,7 @@ func Run(root types.Root) int8 {
 
 			case "getc":
 				a1 := v[getByPtr(root.Commands[e], v)]
-				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
 					var val datatypes.Data
 					s, val = s.Pop()
 					s = s.Push(datatypes.Data{Value: int8(a1.Value.(string)[getInt64(val)]), Type: datatypes.Int8})
@@ -733,7 +734,7 @@ func Run(root types.Root) int8 {
 
 			case "setc":
 				a1 := v[getByPtr(root.Commands[e], v)]
-				if a1.Type == datatypes.String_Unicode || a1.Type == datatypes.String_ASCII {
+				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
 					var char datatypes.Data
 					s, char = s.Pop()
 
@@ -748,7 +749,7 @@ func Run(root types.Root) int8 {
 					tempVal = replaceAtIndex(tempVal, rune(char.Value.(int8)), int(getInt64(pos)))
 					a1.Value = tempVal
 
-					s = s.Push(datatypes.Data{Value: tempVal, Type: datatypes.String_Unicode})
+					s = s.Push(datatypes.Data{Value: tempVal, Type: datatypes.StringUnicode})
 				} else {
 					panic("Value is not of type stringa or stringu!")
 				}
@@ -839,9 +840,9 @@ func Run(root types.Root) int8 {
 			case "v_float64", "v_double":
 				v = declareVar(root.Commands[e], datatypes.Float64, v)
 			case "v_stringa":
-				v = declareVar(root.Commands[e], datatypes.String_ASCII, v)
+				v = declareVar(root.Commands[e], datatypes.StringASCII, v)
 			case "v_stringu":
-				v = declareVar(root.Commands[e], datatypes.String_Unicode, v)
+				v = declareVar(root.Commands[e], datatypes.StringUnicode, v)
 			case "v_bit":
 				v = declareVar(root.Commands[e], datatypes.Bit, v)
 			case "v_ptr":
@@ -863,9 +864,9 @@ func Run(root types.Root) int8 {
 			case "ldf64v", "lddv":
 				s = loadVar(root.Commands[e], datatypes.Float64, v, s)
 			case "ldsav":
-				s = loadVar(root.Commands[e], datatypes.String_ASCII, v, s)
+				s = loadVar(root.Commands[e], datatypes.StringASCII, v, s)
 			case "ldsuv":
-				s = loadVar(root.Commands[e], datatypes.String_Unicode, v, s)
+				s = loadVar(root.Commands[e], datatypes.StringUnicode, v, s)
 			case "ldbv":
 				s = loadVar(root.Commands[e], datatypes.Bit, v, s)
 			case "ldptrv":
@@ -887,9 +888,9 @@ func Run(root types.Root) int8 {
 			case "ldf64c", "lddc":
 				s = loadConst(root.Commands[e], datatypes.Float64, constants, s, e)
 			case "ldsac":
-				s = loadConst(root.Commands[e], datatypes.String_ASCII, constants, s, e)
+				s = loadConst(root.Commands[e], datatypes.StringASCII, constants, s, e)
 			case "ldsuc":
-				s = loadConst(root.Commands[e], datatypes.String_Unicode, constants, s, e)
+				s = loadConst(root.Commands[e], datatypes.StringUnicode, constants, s, e)
 			case "ldbc":
 				s = loadConst(root.Commands[e], datatypes.Bit, constants, s, e)
 

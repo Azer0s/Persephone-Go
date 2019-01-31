@@ -114,19 +114,19 @@ const (
 	Variable = byte(uint8(0xF))
 )
 
-const(
-	Int8      = byte(uint8(0x8))
-	Int16     = byte(uint8(0x10))
-	Int32     = byte(uint8(0x20))
-	Int64     = byte(uint8(0x40))
+const (
+	Int8  = byte(uint8(0x8))
+	Int16 = byte(uint8(0x10))
+	Int32 = byte(uint8(0x20))
+	Int64 = byte(uint8(0x40))
 
-	Float32   = byte(uint8(0x21))
-	Float64   = byte(uint8(0x41))
+	Float32 = byte(uint8(0x21))
+	Float64 = byte(uint8(0x41))
 )
 
 var labels = make(map[string]uint64)
 var variables = map[string]uint64{
-	"RETURN_CODE" : uint64(0x0),
+	"RETURN_CODE": uint64(0x0),
 }
 var currentVariable = uint64(0xF) //first 15 variables are reserved for external values
 var currentLabel = uint64(0x0)
@@ -182,10 +182,10 @@ func Compile(root types.Root, outname string) int {
 
 	defer f.Close()
 
-	fileBytes := make([]byte,0)
+	fileBytes := make([]byte, 0)
 
 	write := func(bytes []byte) {
-		fileBytes = append(fileBytes,bytes...)
+		fileBytes = append(fileBytes, bytes...)
 	}
 
 	flush := func(f *os.File) {
@@ -249,23 +249,23 @@ func Compile(root types.Root, outname string) int {
 			case types.Pointer:
 				write([]byte{Ptr})
 
-				ptrName := strings.Trim(strings.Trim(root.Commands[e].Param.Text,"]"),"[")
-				
+				ptrName := strings.Trim(strings.Trim(root.Commands[e].Param.Text, "]"), "[")
+
 				if _, ok := variables[ptrName]; ok {
 					write(getUint64Bytes(variables[ptrName]))
-				}else{
+				} else {
 					panic("Couldn't find variable: " + ptrName + "!")
 				}
 
 			case types.String:
-				rawString := strings.Trim(root.Commands[e].Param.Text,"\"")
+				rawString := strings.Trim(root.Commands[e].Param.Text, "\"")
 
 				if isAscii(rawString) {
 					write([]byte{StringA})
 					stringBytes := []byte(rawString)
 					write(getUint64Bytes(uint64(len(stringBytes))))
 					write(stringBytes)
-				}else{
+				} else {
 					rawRunes := []rune(rawString)
 					runeBytes := []byte(string(rawRunes))
 
@@ -303,14 +303,14 @@ func Compile(root types.Root, outname string) int {
 		}
 	}
 
-	header := make([]byte,0)
+	header := make([]byte, 0)
 	header = append(header, getUint16Bytes(uint16(len(labelToByte)))...)
 	for k, v := range labelToByte {
 		header = append(header, getUint64Bytes(uint64(labels[k]))...)
 		header = append(header, getUint64Bytes(uint64(v))...)
 	}
 
-	fileBytes = append(header,fileBytes...)
+	fileBytes = append(header, fileBytes...)
 	flush(f)
 	return 0
 }

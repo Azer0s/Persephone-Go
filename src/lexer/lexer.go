@@ -29,7 +29,7 @@ func Lex(lines []string) (tokens []types.Token) {
 	trimComments := regexp.MustCompile("(.*)#.*")
 
 	for e := range lines {
-		code = append(code, []rune(trimComments.ReplaceAllString(lines[e], "$1") + " ")...)
+		code = append(code, []rune(trimComments.ReplaceAllString(lines[e], "$1")+" ")...)
 	}
 
 	isLetter := regexp.MustCompile("[a-zA-Z]")
@@ -78,27 +78,27 @@ func Lex(lines []string) (tokens []types.Token) {
 
 				if letter() == rune('[') { //size is explicitly stated
 					discard()
-					if letter() == rune('3'){
+					if letter() == rune('3') {
 						discard()
-						if letter() == rune('2'){
+						if letter() == rune('2') {
 							discard()
 							current.Size = "32"
-						}else {
+						} else {
 							panic("Expected either [32] or [64]!")
 						}
-					}else if letter() == rune('6') {
+					} else if letter() == rune('6') {
 						discard()
 						if letter() == rune('4') {
 							discard()
 							current.Size = "64"
-						}else {
+						} else {
 							panic("Expected either [32] or [64]!")
 						}
-					}else {
+					} else {
 						panic("Expected either [32] or [64]!")
 					}
 
-					if letter() != rune(']'){
+					if letter() != rune(']') {
 						panic("Expected either [32] or [64]!")
 					}
 					discard()

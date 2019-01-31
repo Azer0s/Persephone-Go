@@ -1,8 +1,9 @@
 package datatypes
 
+// Type for enum for Persephone variable types
 type DataType int16
-type PtrType int8
 
+// Enum for Persephone variable types
 const (
 	Bit DataType = 0x01
 	Ptr DataType = 0x02
@@ -15,10 +16,11 @@ const (
 	Float32 DataType = 0x132
 	Float64 DataType = 0x164
 
-	String_ASCII   DataType = 0x201
-	String_Unicode DataType = 0x202
+	StringASCII   DataType = 0x201
+	StringUnicode DataType = 0x202
 )
 
+// Type for storing variables
 type Data struct {
 	Value interface{}
 	Type  DataType
