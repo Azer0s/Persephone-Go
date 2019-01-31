@@ -125,8 +125,10 @@ const(
 )
 
 var labels = make(map[string]uint64)
-var variables = make(map[string]uint64)
-var currentVariable = uint64(0x0)
+var variables = map[string]uint64{
+	"RETURN_CODE" : uint64(0x0),
+}
+var currentVariable = uint64(0xF) //first 15 variables are reserved for external values
 var currentLabel = uint64(0x0)
 
 func getUint64Bytes(val uint64) []byte {
@@ -169,8 +171,9 @@ func Compile(root types.Root, outname string) int {
 	for e := range root.Labels {
 		labels[e] = currentLabel
 		currentLabel += uint64(0x1)
-		//TODO: Add labels to beginning of file
 	}
+
+	labelToByte := make(map[string]int)
 
 	f, err := os.Create(outname)
 	if err != nil {
@@ -179,8 +182,14 @@ func Compile(root types.Root, outname string) int {
 
 	defer f.Close()
 
-	write := func(f *os.File, bytes []byte) {
-		_, err := f.Write(bytes)
+	fileBytes := make([]byte,0)
+
+	write := func(bytes []byte) {
+		fileBytes = append(fileBytes,bytes...)
+	}
+
+	flush := func(f *os.File) {
+		_, err := f.Write(fileBytes)
 
 		if err != nil {
 			panic(err)
@@ -188,6 +197,12 @@ func Compile(root types.Root, outname string) int {
 	}
 
 	for e := 0; e < len(root.Commands); e++ {
+		for k, v := range root.Labels { //check if a label points to the current line
+			if e == v {
+				labelToByte[k] = len(fileBytes)
+			}
+		}
+
 		isJmp := false
 
 		switch root.Commands[e].Command.Text {
@@ -195,49 +210,49 @@ func Compile(root types.Root, outname string) int {
 			isJmp = true
 		}
 
-		write(f, getUint16Bytes(opcodes[root.Commands[e].Command.Text]))
+		write(getUint16Bytes(opcodes[root.Commands[e].Command.Text]))
 
 		if isJmp && root.Commands[e].Param.Kind == types.Name {
-			write(f, []byte{Label})
-			write(f, getUint64Bytes(labels[root.Commands[e].Param.Text]))
+			write([]byte{Label})
+			write(getUint64Bytes(labels[root.Commands[e].Param.Text]))
 		} else {
 			switch root.Commands[e].Param.Kind {
 			case types.Name:
-				write(f, []byte{Variable})
+				write([]byte{Variable})
 
 				if _, ok := variables[root.Commands[e].Param.Text]; !ok {
 					variables[root.Commands[e].Param.Text] = currentVariable
 					currentVariable += uint64(0x1)
 				}
 
-				write(f, getUint64Bytes(variables[root.Commands[e].Param.Text]))
+				write(getUint64Bytes(variables[root.Commands[e].Param.Text]))
 
 			case types.HexNumber, types.Number:
-				write(f, []byte{Int})
+				write([]byte{Int})
 				var num int64
 				num, _ = strconv.ParseInt(root.Commands[e].Param.Text, 0, 64)
 
 				if num >= -128 && num <= 127 {
-					write(f, []byte{Int8})
-					write(f, []byte{byte(int8(num))})
+					write([]byte{Int8})
+					write([]byte{byte(int8(num))})
 				} else if num >= -32768 && num <= 32767 {
-					write(f, []byte{Int16})
-					write(f, getUint16Bytes(uint16(num)))
+					write([]byte{Int16})
+					write(getUint16Bytes(uint16(num)))
 				} else if num >= -2147483648 && num <= 2147483647 {
-					write(f, []byte{Int32})
-					write(f, getUint32Bytes(uint32(num)))
+					write([]byte{Int32})
+					write(getUint32Bytes(uint32(num)))
 				} else {
-					write(f, []byte{Int64})
-					write(f, getUint64Bytes(uint64(num)))
+					write([]byte{Int64})
+					write(getUint64Bytes(uint64(num)))
 				}
 
 			case types.Pointer:
-				write(f, []byte{Ptr})
+				write([]byte{Ptr})
 
 				ptrName := strings.Trim(strings.Trim(root.Commands[e].Param.Text,"]"),"[")
 				
 				if _, ok := variables[ptrName]; ok {
-					write(f, getUint64Bytes(variables[ptrName]))
+					write(getUint64Bytes(variables[ptrName]))
 				}else{
 					panic("Couldn't find variable: " + ptrName + "!")
 				}
@@ -246,25 +261,25 @@ func Compile(root types.Root, outname string) int {
 				rawString := strings.Trim(root.Commands[e].Param.Text,"\"")
 
 				if isAscii(rawString) {
-					write(f, []byte{StringA})
+					write([]byte{StringA})
 					stringBytes := []byte(rawString)
-					write(f, getUint64Bytes(uint64(len(stringBytes))))
-					write(f, stringBytes)
+					write(getUint64Bytes(uint64(len(stringBytes))))
+					write(stringBytes)
 				}else{
 					rawRunes := []rune(rawString)
 					runeBytes := []byte(string(rawRunes))
 
-					write(f, []byte{StringU})
-					write(f, getUint64Bytes(uint64(len(runeBytes))))
-					write(f, runeBytes)
+					write([]byte{StringU})
+					write(getUint64Bytes(uint64(len(runeBytes))))
+					write(runeBytes)
 				}
 
 			//You'll float too
 			case types.Float:
-				write(f, []byte{Float})
+				write([]byte{Float})
 				switch root.Commands[e].Param.Size {
 				case "64":
-					write(f, []byte{Float64})
+					write([]byte{Float64})
 
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 64)
@@ -272,9 +287,9 @@ func Compile(root types.Root, outname string) int {
 					var buf [8]byte
 					binary.BigEndian.PutUint64(buf[:], math.Float64bits(num))
 
-					write(f, buf[:])
+					write(buf[:])
 				default: //if size isn't stated, use 32 bit
-					write(f, []byte{Float32})
+					write([]byte{Float32})
 
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 32)
@@ -282,11 +297,20 @@ func Compile(root types.Root, outname string) int {
 					var buf [4]byte
 					binary.BigEndian.PutUint32(buf[:], math.Float32bits(float32(num)))
 
-					write(f, buf[:])
+					write(buf[:])
 				}
 			}
 		}
 	}
 
+	header := make([]byte,0)
+	header = append(header, getUint16Bytes(uint16(len(labelToByte)))...)
+	for k, v := range labelToByte {
+		header = append(header, getUint64Bytes(uint64(labels[k]))...)
+		header = append(header, getUint64Bytes(uint64(v))...)
+	}
+
+	fileBytes = append(header,fileBytes...)
+	flush(f)
 	return 0
 }
