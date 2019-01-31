@@ -92,6 +92,7 @@ var opcodes = map[string]uint16{
 	"getc"		: uint16(0x0022),
 	"setc"		: uint16(0x0023),
 	"syscall"	: uint16(0x0024),
+	"extern"	: uint16(0x0025),
 	"call"		: uint16(0xF000),
 	"jmp"		: uint16(0xF001),
 	"jmpt"		: uint16(0xF002),
