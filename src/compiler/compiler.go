@@ -98,7 +98,45 @@ var opcodes = map[string]uint16{
 	"jmpf"		: uint16(0xF003),
 }
 
+const(
+	Int byte = byte(uint8(0x1))
+	Float byte = byte(uint8(0x2))
+	StringA byte = byte(uint8(0x3))
+	StringU byte = byte(uint8(0x4))
+	Bit byte = byte(uint8(0x5))
+	Ptr byte = byte(uint8(0x6))
+	Label byte = byte(uint8(0xE))
+	Variable byte = byte(uint8(0xF))
+)
+
+func getUint64Btyes(val uint64) []byte{
+	return []byte{
+		byte((val & 0xFF00000000000000) >> 56),
+		byte((val & 0x00FF000000000000) >> 48),
+		byte((val & 0x0000FF0000000000) >> 40),
+		byte((val & 0x000000FF00000000) >> 32),
+		byte((val & 0x00000000FF000000) >> 24),
+		byte((val & 0x0000000000FF0000) >> 16),
+		byte((val & 0x000000000000FF00) >> 8),
+		byte((val & 0x00000000000000FF)),
+	}
+}
+
+func getUint16Bytes(val uint16) []byte{
+	return []byte{
+		byte((val & 0xFF00) >> 8), //Get upper 8 bits
+		byte((val & 0x00FF)), //Get lower 8 bits
+	}
+}
+
 func Compile(root types.Root, outname string) int{
+	labels := make(map[string]uint64)
+
+	var currentLabel uint64 = uint64(0x0)
+	for e := range root.Labels {
+		labels[e] = currentLabel
+		currentLabel += uint64(0x1)
+	}
 
 	f, err := os.Create(outname)
 	if err != nil {
@@ -106,6 +144,14 @@ func Compile(root types.Root, outname string) int{
 	}
 
 	defer f.Close()
+
+	write := func(f *os.File, bytes []byte) {
+		_,err := f.Write(bytes)
+
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	for e := 0; e < len(root.Commands); e++ {
 		isJmp := false
@@ -115,19 +161,14 @@ func Compile(root types.Root, outname string) int{
 			isJmp = true
 		}
 
-		_,err := f.Write([]byte{
-			byte(opcodes[root.Commands[e].Command.Text] & 0xFF00), //Get upper 8 bits
-			byte(opcodes[root.Commands[e].Command.Text] & 0x00FF)}) //Get lower 8 bits
-
-		if err != nil {
-			panic(err)
-		}
+		write(f, getUint16Bytes(opcodes[root.Commands[e].Command.Text]))
 
 		if isJmp && root.Commands[e].Param.Kind == types.Name{
-			//Label name -> int64
+			write(f, []byte{Label})
+			write(f, getUint64Btyes(labels[root.Commands[e].Param.Text]))
 		}else{
 			switch root.Commands[e].Param.Kind {
-
+			//TODO: Add commands
 			}
 		}
 	}
