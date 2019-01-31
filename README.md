@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Azer0s/Persephone-Go.svg?branch=master)](https://travis-ci.org/Azer0s/Persephone-Go)  [![Go Report Card](https://goreportcard.com/badge/github.com/Azer0s/Persephone-Go)](https://goreportcard.com/report/github.com/Azer0s/Persephone-Go) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Azer0s/Persephone-Go/blob/master/README.md)
 
 # Persephone-Go
 
