@@ -8,11 +8,11 @@ import (
 )
 
 var current = types.Token{Kind: "", Text: ""}
-var code string
+var code []rune
 var index = 0
 
 func consume() {
-	current.Text += letter()
+	current.Text += string(letter())
 	index++
 }
 
@@ -20,8 +20,8 @@ func discard() {
 	index++
 }
 
-func letter() string {
-	return string(code[index])
+func letter() rune {
+	return code[index]
 }
 
 func Lex(lines []string) (tokens []types.Token) {
@@ -29,75 +29,103 @@ func Lex(lines []string) (tokens []types.Token) {
 	trimComments := regexp.MustCompile("(.*)#.*")
 
 	for e := range lines {
-		code += trimComments.ReplaceAllString(lines[e], "$1") + " "
+		code = append(code, []rune(trimComments.ReplaceAllString(lines[e], "$1") + " ")...)
 	}
 
 	isLetter := regexp.MustCompile("[a-zA-Z]")
 	isNumber := regexp.MustCompile("[0-9]")
 
 	for index = 0; index < len(code); index++ {
-		if letter() == " " || letter() == "\t" {
+		if letter() == rune(' ') || letter() == rune('\t') {
 			continue
 		}
 
-		if isLetter.MatchString(letter()) {
-			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_" {
+		if isLetter.MatchString(string(letter())) {
+			for isLetter.MatchString(string(letter())) || isNumber.MatchString(string(letter())) || letter() == rune('_') {
 				consume()
 			}
 
 			current.Kind = types.Name
 
-			if letter() == ":" {
+			if letter() == rune(':') {
 				current.Kind = types.Label
 				discard()
 			}
-		} else if isNumber.MatchString(letter()) {
+		} else if isNumber.MatchString(string(letter())) {
 			consume()
 
-			if letter() == "x" {
+			if letter() == rune('x') {
 				current.Kind = types.HexNumber
 				consume()
 			} else {
 				current.Kind = types.Number
 			}
 
-			for isNumber.MatchString(letter()) {
+			for isNumber.MatchString(string(letter())) {
 				consume()
 			}
 
-			if letter() == "." {
+			if letter() == rune('.') {
 				if current.Kind == types.HexNumber {
 					fmt.Println("Hexnumber can't have a decimal point!")
 					return nil
 				}
 				consume()
 				current.Kind = types.Float
-				for isNumber.MatchString(letter()) {
+				for isNumber.MatchString(string(letter())) {
 					consume()
 				}
+
+				if letter() == rune('[') { //size is explicitly stated
+					discard()
+					if letter() == rune('3'){
+						discard()
+						if letter() == rune('2'){
+							discard()
+							current.Size = "32"
+						}else {
+							panic("Expected either [32] or [64]!")
+						}
+					}else if letter() == rune('6') {
+						discard()
+						if letter() == rune('4') {
+							discard()
+							current.Size = "64"
+						}else {
+							panic("Expected either [32] or [64]!")
+						}
+					}else {
+						panic("Expected either [32] or [64]!")
+					}
+
+					if letter() != rune(']'){
+						panic("Expected either [32] or [64]!")
+					}
+					discard()
+				}
 			}
-		} else if letter() == "[" {
+		} else if letter() == rune('[') {
 			current.Kind = types.Pointer
 			consume()
 
-			for isLetter.MatchString(letter()) || isNumber.MatchString(letter()) || letter() == "_" {
+			for isLetter.MatchString(string(letter())) || isNumber.MatchString(string(letter())) || letter() == rune('_') {
 				consume()
 			}
 
-			if letter() != "]" {
-				fmt.Println("Expected a closing ], got: " + letter() + "!")
+			if letter() != rune(']') {
+				fmt.Println("Expected a closing ], got: " + string(letter()) + "!")
 				return nil
 			} else {
 				consume()
 			}
-		} else if letter() == "\"" {
+		} else if letter() == rune('"') {
 			current.Kind = types.String
 			consume()
-			for letter() != "\"" {
+			for letter() != rune('"') {
 				consume()
 			}
 			consume()
-		} else if letter() == "'" {
+		} else if letter() == rune('\'') {
 			discard()
 			consume()
 			discard()
@@ -105,7 +133,7 @@ func Lex(lines []string) (tokens []types.Token) {
 			current.Text = strconv.Itoa(int(int8(current.Text[0])))
 			current.Kind = types.Number
 		} else {
-			fmt.Println("Unknown token: " + letter() + "!")
+			fmt.Println("Unknown token: " + string(letter()) + "!")
 			return nil
 		}
 

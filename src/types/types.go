@@ -44,6 +44,7 @@ const (
 
 type Token struct {
 	Kind Kind
+	Size string
 	Text string
 }
 

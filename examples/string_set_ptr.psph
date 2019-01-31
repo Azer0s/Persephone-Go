@@ -1,5 +1,5 @@
 v_stringa h
-dcsa "Foo"
+dcsa "Foo⌘"
 ldsac 0
 store h
 

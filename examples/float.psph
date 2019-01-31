@@ -1,0 +1,9 @@
+dcf 12.1
+dcf 23.4445[64] # gets cast into float32
+
+# float literals can be followed by either [32] or [64] to explicitly declare their size; if the size has not been declared explicitly, it is assumed to be a float32
+
+ldfc 0
+ldfc 1
+addf
+syscall 0x01
