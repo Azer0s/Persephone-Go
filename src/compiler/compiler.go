@@ -98,18 +98,18 @@ var opcodes = map[string]uint16{
 	"jmpf"		: uint16(0xF003),
 }
 
-const(
-	Int byte = byte(uint8(0x1))
-	Float byte = byte(uint8(0x2))
-	StringA byte = byte(uint8(0x3))
-	StringU byte = byte(uint8(0x4))
-	Bit byte = byte(uint8(0x5))
-	Ptr byte = byte(uint8(0x6))
-	Label byte = byte(uint8(0xE))
+const (
+	Int      byte = byte(uint8(0x1))
+	Float    byte = byte(uint8(0x2))
+	StringA  byte = byte(uint8(0x3))
+	StringU  byte = byte(uint8(0x4))
+	Bit      byte = byte(uint8(0x5))
+	Ptr      byte = byte(uint8(0x6))
+	Label    byte = byte(uint8(0xE))
 	Variable byte = byte(uint8(0xF))
 )
 
-func getUint64Btyes(val uint64) []byte{
+func getUint64Btyes(val uint64) []byte {
 	return []byte{
 		byte((val & 0xFF00000000000000) >> 56),
 		byte((val & 0x00FF000000000000) >> 48),
@@ -118,18 +118,18 @@ func getUint64Btyes(val uint64) []byte{
 		byte((val & 0x00000000FF000000) >> 24),
 		byte((val & 0x0000000000FF0000) >> 16),
 		byte((val & 0x000000000000FF00) >> 8),
-		byte((val & 0x00000000000000FF)),
+		byte(val & 0x00000000000000FF),
 	}
 }
 
-func getUint16Bytes(val uint16) []byte{
+func getUint16Bytes(val uint16) []byte {
 	return []byte{
 		byte((val & 0xFF00) >> 8), //Get upper 8 bits
-		byte((val & 0x00FF)), //Get lower 8 bits
+		byte(val & 0x00FF),        //Get lower 8 bits
 	}
 }
 
-func Compile(root types.Root, outname string) int{
+func Compile(root types.Root, outname string) int {
 	labels := make(map[string]uint64)
 
 	var currentLabel uint64 = uint64(0x0)
@@ -146,7 +146,7 @@ func Compile(root types.Root, outname string) int{
 	defer f.Close()
 
 	write := func(f *os.File, bytes []byte) {
-		_,err := f.Write(bytes)
+		_, err := f.Write(bytes)
 
 		if err != nil {
 			panic(err)
@@ -157,16 +157,16 @@ func Compile(root types.Root, outname string) int{
 		isJmp := false
 
 		switch root.Commands[e].Command.Text {
-		case "call","jmp","jmpt","jmpf":
+		case "call", "jmp", "jmpt", "jmpf":
 			isJmp = true
 		}
 
 		write(f, getUint16Bytes(opcodes[root.Commands[e].Command.Text]))
 
-		if isJmp && root.Commands[e].Param.Kind == types.Name{
+		if isJmp && root.Commands[e].Param.Kind == types.Name {
 			write(f, []byte{Label})
 			write(f, getUint64Btyes(labels[root.Commands[e].Param.Text]))
-		}else{
+		} else {
 			switch root.Commands[e].Param.Kind {
 			//TODO: Add commands
 			}
