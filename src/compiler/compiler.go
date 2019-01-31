@@ -100,15 +100,20 @@ var opcodes = map[string]uint16{
 }
 
 const (
-	Int      byte = byte(uint8(0x1))
-	Float    byte = byte(uint8(0x2))
-	StringA  byte = byte(uint8(0x3))
-	StringU  byte = byte(uint8(0x4))
-	Bit      byte = byte(uint8(0x5))
-	Ptr      byte = byte(uint8(0x6))
-	Label    byte = byte(uint8(0xE))
-	Variable byte = byte(uint8(0xF))
+	Int      = byte(uint8(0x1))
+	Float    = byte(uint8(0x2))
+	StringA  = byte(uint8(0x3))
+	StringU  = byte(uint8(0x4))
+	Bit      = byte(uint8(0x5))
+	Ptr      = byte(uint8(0x6))
+	Label    = byte(uint8(0xE))
+	Variable = byte(uint8(0xF))
 )
+
+var labels = make(map[string]uint64)
+var variables = make(map[string]uint64)
+var currentVariable = uint64(0x0)
+var currentLabel = uint64(0x0)
 
 func getUint64Btyes(val uint64) []byte {
 	return []byte{
@@ -130,10 +135,8 @@ func getUint16Bytes(val uint16) []byte {
 	}
 }
 
-func Compile(root types.Root, outname string) int {
-	labels := make(map[string]uint64)
 
-	var currentLabel uint64 = uint64(0x0)
+func Compile(root types.Root, outname string) int {
 	for e := range root.Labels {
 		labels[e] = currentLabel
 		currentLabel += uint64(0x1)
@@ -169,7 +172,18 @@ func Compile(root types.Root, outname string) int {
 			write(f, getUint64Btyes(labels[root.Commands[e].Param.Text]))
 		} else {
 			switch root.Commands[e].Param.Kind {
-			//TODO: Add commands
+			case types.Name:
+				write(f, []byte{Variable})
+
+				if _,ok := variables[root.Commands[e].Param.Text]; !ok{
+					variables[root.Commands[e].Param.Text] = currentVariable
+					currentVariable += uint64(0x1)
+				}
+
+				write(f, getUint64Btyes(variables[root.Commands[e].Param.Text]))
+
+			case types.HexNumber, types. Number:
+				write(f, []byte{Int})
 			}
 		}
 	}
