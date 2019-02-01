@@ -1,0 +1,18 @@
+v_int32 var0
+dci32 100
+ldi32c 0
+store var0
+
+ldi32v var0
+syscall 0x01
+
+delete var0
+cbase
+
+v_int32 var0
+dci32 1000
+ldi32c 0
+store var0
+
+ldi32v var0
+syscall 0x01
