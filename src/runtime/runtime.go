@@ -712,9 +712,9 @@ func Run(root types.Root) int8 {
 
 			/*
 				Delete var
-			 */
+			*/
 			case "delete":
-				varName := getByPtr(root.Commands[e],v)
+				varName := getByPtr(root.Commands[e], v)
 				_, ok := v[varName]
 				if ok {
 					delete(v, varName)
