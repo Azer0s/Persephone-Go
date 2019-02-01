@@ -580,7 +580,7 @@ func getByPtr(command types.Command, v map[string]datatypes.Data) string {
 	return ""
 }
 
-// Walks the AST and basically executes the program "line-by-line"
+//Run ...Walks the AST and basically executes the program "line-by-line"
 func Run(root types.Root) int8 {
 	//Global var initialization
 	constants = make([]datatypes.Data, 0)

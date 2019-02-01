@@ -24,6 +24,7 @@ func letter() rune {
 	return code[index]
 }
 
+//Lex ...Lexes Persephone code and returns an array of tokens
 func Lex(lines []string) (tokens []types.Token) {
 	add := func() { tokens = append(tokens, current); current = types.Token{Kind: "", Text: ""} }
 	trimComments := regexp.MustCompile("(.*)#.*")
@@ -115,9 +116,9 @@ func Lex(lines []string) (tokens []types.Token) {
 			if letter() != rune(']') {
 				fmt.Println("Expected a closing ], got: " + string(letter()) + "!")
 				return nil
-			} else {
-				consume()
 			}
+
+			consume()
 		} else if letter() == rune('"') {
 			current.Kind = types.String
 			consume()

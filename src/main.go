@@ -30,7 +30,7 @@ func mainReturnWithCode() int {
 
 	if compile {
 		return int(compiler.Compile(root, out))
-	} else {
-		return int(runtime.Run(root))
 	}
+
+	return int(runtime.Run(root))
 }

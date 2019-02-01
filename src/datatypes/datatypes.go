@@ -1,6 +1,6 @@
 package datatypes
 
-// Type for enum for Persephone variable types
+//DataType ...Type for enum for Persephone variable types
 type DataType int16
 
 // Enum for Persephone variable types
@@ -20,7 +20,7 @@ const (
 	StringUnicode DataType = 0x202
 )
 
-// Type for storing variables
+//Data ...Type for storing variables
 type Data struct {
 	Value interface{}
 	Type  DataType

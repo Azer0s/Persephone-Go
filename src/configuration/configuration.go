@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 )
 
-// Parses args into config values
+//GetConfig ...Parses args into config values
 func GetConfig(args []string) (file, workdir, out string, compile bool) {
 
 	for k, v := range args {
