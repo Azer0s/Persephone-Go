@@ -19,4 +19,5 @@ run/%.psph: %.psph
 	@./bin/persephone -i $<
 
 test:
+	@perl -pi -e 's/\r\n/\n/g' test.sh
 	@./test.sh

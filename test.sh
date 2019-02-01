@@ -1,3 +1,4 @@
-for f in examples/*.psph do
+for f in examples/*.psph
+do
   ./bin/persephone -i $f
 done
