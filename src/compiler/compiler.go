@@ -60,6 +60,7 @@ var opcodes = map[string]uint16{
 	"ldsac":     uint16(0x0431),
 	"ldsuc":     uint16(0x0432),
 	"ldbc":      uint16(0x0400),
+	"cbase":     uint16(0xFFFF),
 	"pop":       uint16(0x0001),
 	"ret":       uint16(0x0002),
 	"add":       uint16(0x0003),
