@@ -19,3 +19,20 @@ $ make
 $ make run/examples/fib.psph
 ```
  
+### Run file
+
+```bash
+$ ./bin/persephone -i /path/to/file
+```
+
+### Compile a file
+
+```bash
+$ ./bin/persephone -i /path/to/file -c /path/to/output/file
+```
+
+### Run a compiled file
+
+```bash
+$ ./bin/persephone -i /path/to/file -b
+```
