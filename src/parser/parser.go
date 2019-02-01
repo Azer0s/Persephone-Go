@@ -39,16 +39,17 @@ func parseStatement() (command types.Command) {
 		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer {
 			command.Param = tokens[index]
 			return
-		} else {
-			fmt.Println("Expected name, number, hexnumber, flaot, string or pointer, got: " + tokens[index].Kind)
-			return types.Command{}
 		}
+
+		fmt.Println("Expected name, number, hexnumber, flaot, string or pointer, got: " + tokens[index].Kind)
+		return types.Command{}
 	} else {
 		fmt.Println("Expected name, got: " + tokens[index].Kind)
 		return types.Command{}
 	}
 }
 
+//Parse ...Parses a list of tokens into an AST
 func Parse(tks []types.Token) (root types.Root) {
 	tokens = tks
 	index = 0

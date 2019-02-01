@@ -105,6 +105,7 @@ var opcodes = map[string]uint16{
 	"jmpf":      uint16(0xF003),
 }
 
+//Value prefixes for parameters
 const (
 	Int      = byte(uint8(0x1))
 	Float    = byte(uint8(0x2))
@@ -116,6 +117,7 @@ const (
 	Variable = byte(uint8(0xF))
 )
 
+//Size prefixes for int and float for parameters
 const (
 	Int8  = byte(uint8(0x8))
 	Int16 = byte(uint8(0x10))
