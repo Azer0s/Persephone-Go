@@ -20,4 +20,5 @@ run/%.psph: %.psph
 
 test:
 	@perl -pi -e 's/\r\n/\n/g' test.sh
+	@chmod +x test.sh
 	@./test.sh
