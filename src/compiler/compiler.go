@@ -23,6 +23,7 @@ var opcodes = map[string]uint16{
 	"v_stringu": uint16(0x0132),
 	"v_ptr":     uint16(0x0150),
 	"v_bit":     uint16(0x0100),
+	"delete":    uint16(0x0099),
 	"dci8":      uint16(0x0218),
 	"dci16":     uint16(0x0210),
 	"dci32":     uint16(0x0220),

@@ -711,6 +711,16 @@ func Run(root types.Root) int8 {
 				s, v = store(root.Commands[e], s, v)
 
 			/*
+				Delete var
+			 */
+			case "delete":
+				varName := getByPtr(root.Commands[e],v)
+				_, ok := v[varName]
+				if ok {
+					delete(v, varName)
+				}
+
+			/*
 				String functions
 			*/
 			case "len":
