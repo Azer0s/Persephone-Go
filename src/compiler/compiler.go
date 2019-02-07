@@ -221,6 +221,15 @@ func Compile(root types.Root, outname string) int {
 			write(getUint64Bytes(labels[root.Commands[e].Param.Text]))
 		} else {
 			switch root.Commands[e].Param.Kind {
+			case types.Bit:
+				write([]byte{Bit})
+				switch root.Commands[e].Param.Text {
+				case "true":
+					write([]byte{0x1})
+				case "false":
+					write([]byte{0x0})
+				}
+
 			case types.Name:
 				write([]byte{Variable})
 
@@ -288,20 +297,22 @@ func Compile(root types.Root, outname string) int {
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 64)
 
-					var buf [8]byte
-					binary.BigEndian.PutUint64(buf[:], math.Float64bits(num))
+					bits := math.Float64bits(num)
+					bytes := make([]byte,8)
+					binary.LittleEndian.PutUint64(bytes,bits)
 
-					write(buf[:])
+					write(bytes[:])
 				default: //if size isn't stated, use 32 bit
 					write([]byte{Float32})
 
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 32)
 
-					var buf [4]byte
-					binary.BigEndian.PutUint32(buf[:], math.Float32bits(float32(num)))
+					bits := math.Float32bits(float32(num))
+					bytes := make([]byte,4)
+					binary.LittleEndian.PutUint32(bytes,bits)
 
-					write(buf[:])
+					write(bytes[:])
 				}
 			}
 		}

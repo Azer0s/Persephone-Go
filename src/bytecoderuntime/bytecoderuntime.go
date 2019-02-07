@@ -1,7 +1,18 @@
 package bytecoderuntime
 
+import (
+	"../compiler"
+	"../datatypes"
+	"encoding/binary"
+	"math"
+)
+
 func getUint64FromBytes(a, b, c, d, e, f, g, h byte) uint64 {
 	return (uint64(a) << 56) + (uint64(b) << 48) + (uint64(c) << 40) + (uint64(d) << 32) + (uint64(e) << 24) + (uint64(f) << 16) + (uint64(g) << 8) + uint64(h)
+}
+
+func getUint32FromBytes(a, b, c, d byte) uint32 {
+	return (uint32(a) << 24) + (uint32(b) << 16) + (uint32(c) << 8) + uint32(d)
 }
 
 func getUint16FromBytes(a, b byte) uint16 {
@@ -38,7 +49,94 @@ func Run(bytes []byte) int8 {
 	code := bytes[labelPtr:]
 
 	for e := 0; e < len(code); e++ {
+		opcode := getUint16FromBytes(code[e],code[e + 1])
+		e += 2
 
+		parameter := false
+
+		switch opcode {
+
+		default:
+			//Opcode has a parameter
+			parameter = true
+		}
+
+		if parameter {
+			paramType := code[e]
+			e++
+
+			param := datatypes.Data{}
+
+			switch paramType {
+			case compiler.Int:
+				intSize := code[e]
+				e++
+
+				switch intSize {
+				case compiler.Int8:
+					param.Type = datatypes.Int8
+					param.Value = int8(code[e])
+					e++
+
+				case compiler.Int16:
+					param.Type = datatypes.Int16
+					param.Value = int16(getUint16FromBytes(code[e], code[e + 1]))
+					e += 2
+
+				case compiler.Int32:
+					param.Type = datatypes.Int32
+					param.Value = int32(getUint32FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3]))
+					e += 4
+
+				case compiler.Int64:
+					param.Type = datatypes.Int64
+					param.Value = int64(getUint64FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7]))
+					e += 8
+				}
+
+			case compiler.Float:
+				floatSize := code[e]
+				e++
+
+				switch floatSize {
+				case compiler.Float32:
+					bytes := []byte{code[e], code[e + 1], code[e + 2], code[e + 3]}
+					e += 4
+
+					bits := binary.LittleEndian.Uint32(bytes)
+
+					param.Type = datatypes.Float32
+					param.Value = math.Float32frombits(bits)
+
+				case compiler.Float64:
+					bytes := []byte{code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7]}
+					e += 8
+
+					bits := binary.LittleEndian.Uint64(bytes)
+
+					param.Type = datatypes.Float64
+					param.Value = math.Float64frombits(bits)
+				}
+			case compiler.StringA:
+			case compiler.StringU:
+			case compiler.Bit:
+				param.Type = datatypes.Bit
+				val := code[e]
+				e++
+
+				if val == 0x0 {
+					param.Value = false
+				}else {
+					param.Value = true
+				}
+			case compiler.Ptr:
+			case compiler.Label:
+				param.Type = datatypes.Label
+				param.Value = getUint64FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7])
+				e+= 8
+			case compiler.Variable:
+			}
+		}
 	}
 
 	return 0

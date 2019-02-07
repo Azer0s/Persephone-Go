@@ -297,11 +297,10 @@ func bitOp(s stack, op types.Op) stack {
 		return s
 	}
 
+	s, left = s.Pop()
 	if left.Type != datatypes.Bit {
 		panic("Value is not of type bit!")
 	}
-
-	s, left = s.Pop()
 
 	var result bool
 
@@ -372,9 +371,9 @@ func declareBitConstant(command types.Command, c []datatypes.Data) []datatypes.D
 	val := false
 
 	switch command.Param.Text {
-	case "0":
+	case "false":
 		val = false
-	case "1":
+	case "true":
 		val = true
 	default:
 		panic("Value is not of type bit!")

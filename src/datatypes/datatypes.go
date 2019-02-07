@@ -5,6 +5,7 @@ type DataType int16
 
 // Enum for Persephone variable types
 const (
+	Label DataType = 0x0
 	Bit DataType = 0x01
 	Ptr DataType = 0x02
 

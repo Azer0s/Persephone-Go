@@ -1,0 +1,10 @@
+dci32 -21
+dcf -132.4
+
+cbase
+dcb false
+dcb true
+ldbc 1
+ldbc 0
+xor
+syscall 0x01

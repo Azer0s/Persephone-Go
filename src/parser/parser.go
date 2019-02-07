@@ -36,7 +36,7 @@ func parseStatement() (command types.Command) {
 		command.Command = tokens[index]
 		index++
 
-		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer {
+		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer || tokens[index].Kind == types.Bit{
 			command.Param = tokens[index]
 			return
 		}

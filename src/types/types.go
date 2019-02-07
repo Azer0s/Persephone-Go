@@ -40,6 +40,7 @@ const (
 	Pointer   Kind = "pointer"
 	Label     Kind = "label"
 	Unknown   Kind = "unknown"
+	Bit       Kind = "bit"
 )
 
 type Token struct {
