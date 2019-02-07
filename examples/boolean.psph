@@ -1,0 +1,12 @@
+dcb false
+dcb true
+
+ldbc 0
+ldbc 1
+xor
+syscall 0x01
+
+ldbc 1
+ldbc 1
+and
+pop
