@@ -19,6 +19,8 @@ const (
 
 	StringASCII   DataType = 0x201
 	StringUnicode DataType = 0x202
+
+	Variable DataType = 0xFFF
 )
 
 //Data ...Type for storing variables

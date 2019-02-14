@@ -7,6 +7,42 @@ import (
 	"math"
 )
 
+var noParamOpcodes = map[uint16]string{
+	uint16(0x0003) : "add",
+	uint16(0x0004) : "sub",
+	uint16(0x0005) : "mul",
+	uint16(0x0006) : "div",
+	uint16(0x0007) : "mod",
+	uint16(0x000C) : "andi",
+	uint16(0x000D) : "ori",
+	uint16(0x000E) : "xori",
+	uint16(0x000F) : "noti",
+	uint16(0x0010) : "shl",
+	uint16(0x0011) : "shr",
+	uint16(0x0014) : "addf",
+	uint16(0x0015) : "subf",
+	uint16(0x0016) : "mulf",
+	uint16(0x0017) : "divf",
+	uint16(0x0001) : "pop",
+	uint16(0x0008) : "ge",
+	uint16(0x0009) : "le",
+	uint16(0x000A) : "gt",
+	uint16(0x000B) : "lt",
+	uint16(0x0018) : "gef",
+	uint16(0x0019) : "lef",
+	uint16(0x001A) : "gtf",
+	uint16(0x001B) : "ltf",
+	uint16(0x0012) : "inc",
+	uint16(0x0013) : "dec",
+	uint16(0xFFFF) : "cbase",
+	uint16(0x001C) : "and",
+	uint16(0x001D) : "or",
+	uint16(0x001E) : "xor",
+	uint16(0x001F) : "not",
+	uint16(0x0002) : "ret",
+	uint16(0x0020) : "conc",
+}
+
 func getUint64FromBytes(a, b, c, d, e, f, g, h byte) uint64 {
 	return (uint64(a) << 56) + (uint64(b) << 48) + (uint64(c) << 40) + (uint64(d) << 32) + (uint64(e) << 24) + (uint64(f) << 16) + (uint64(g) << 8) + uint64(h)
 }
@@ -17,6 +53,12 @@ func getUint32FromBytes(a, b, c, d byte) uint32 {
 
 func getUint16FromBytes(a, b byte) uint16 {
 	return (uint16(a) << 8) + uint16(b)
+}
+
+func getNextUint64(code []byte, e *int) uint64 {
+	val := getUint64FromBytes(code[*e], code[(*e) + 1], code[(*e) + 2], code[(*e) + 3], code[(*e) + 4], code[(*e) + 5], code[(*e) + 6], code[(*e) + 7])
+	*e += 8
+	return val
 }
 
 //Run ...Runs a compiled Persephone file
@@ -54,10 +96,9 @@ func Run(bytes []byte) int8 {
 
 		parameter := false
 
-		switch opcode {
-
-		default:
-			//Opcode has a parameter
+		if _, ok := noParamOpcodes[opcode]; ok{
+			parameter = false
+		}else{
 			parameter = true
 		}
 
@@ -130,11 +171,14 @@ func Run(bytes []byte) int8 {
 					param.Value = true
 				}
 			case compiler.Ptr:
+				param.Type = datatypes.Ptr
+				param.Value = getNextUint64(code, &e)
 			case compiler.Label:
 				param.Type = datatypes.Label
-				param.Value = getUint64FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7])
-				e+= 8
+				param.Value = getNextUint64(code, &e)
 			case compiler.Variable:
+				param.Type = datatypes.Variable
+				param.Value = getNextUint64(code, &e)
 			}
 		}
 	}
