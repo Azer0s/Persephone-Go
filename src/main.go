@@ -25,13 +25,13 @@ func mainReturnWithCode() int {
 	if isBinary {
 		f, err := os.Open(filename)
 
-		if err != nil{
+		if err != nil {
 			panic(err)
 		}
 
 		stat, err := f.Stat()
 
-		buf := make([]byte,stat.Size())
+		buf := make([]byte, stat.Size())
 		f.Read(buf)
 
 		return int(bytecoderuntime.Run(buf))

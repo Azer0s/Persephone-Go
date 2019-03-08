@@ -9,11 +9,11 @@ import (
 
 type command struct {
 	opcode uint16
-	param datatypes.Data
+	param  datatypes.Data
 }
 
 func getNextUint64(code []byte, e *int) uint64 {
-	val := getUint64FromBytes(code[*e], code[(*e) + 1], code[(*e) + 2], code[(*e) + 3], code[(*e) + 4], code[(*e) + 5], code[(*e) + 6], code[(*e) + 7])
+	val := getUint64FromBytes(code[*e], code[(*e)+1], code[(*e)+2], code[(*e)+3], code[(*e)+4], code[(*e)+5], code[(*e)+6], code[(*e)+7])
 	*e += 8
 	return val
 }
@@ -31,7 +31,7 @@ func getUint16FromBytes(a, b byte) uint16 {
 }
 
 func getNextUint64(code []byte, e *int) uint64 {
-	val := getUint64FromBytes(code[*e], code[(*e) + 1], code[(*e) + 2], code[(*e) + 3], code[(*e) + 4], code[(*e) + 5], code[(*e) + 6], code[(*e) + 7])
+	val := getUint64FromBytes(code[*e], code[(*e)+1], code[(*e)+2], code[(*e)+3], code[(*e)+4], code[(*e)+5], code[(*e)+6], code[(*e)+7])
 	*e += 8
 	return val
 }
@@ -67,47 +67,47 @@ func Run(bytes []byte) int8 {
 
 	statements := make([]command, 0)
 
-	for e := 0; e < len(code);{
-		opcode := getUint16FromBytes(code[e],code[e + 1])
+	for e := 0; e < len(code); {
+		opcode := getUint16FromBytes(code[e], code[e+1])
 		e += 2
 
 		parameter := false
 
 		switch opcode {
 		case uint16(0x0003),
-			 uint16(0x0004),
-			 uint16(0x0005),
-			 uint16(0x0006),
-			 uint16(0x0007),
-			 uint16(0x000C),
-			 uint16(0x000D),
-			 uint16(0x000E),
-			 uint16(0x000F),
-			 uint16(0x0010),
-			 uint16(0x0011),
-			 uint16(0x0014),
-			 uint16(0x0015),
-			 uint16(0x0016),
-			 uint16(0x0017),
-			 uint16(0x0001),
-			 uint16(0x0008),
-			 uint16(0x0009),
-			 uint16(0x000A),
-			 uint16(0x000B),
-			 uint16(0x0018),
-			 uint16(0x0019),
-			 uint16(0x001A),
-			 uint16(0x001B),
-			 uint16(0x0012),
-			 uint16(0x0013),
-			 uint16(0xFFFF),
-			 uint16(0x001C),
-			 uint16(0x001D),
-			 uint16(0x001E),
-			 uint16(0x001F),
-			 uint16(0x0002),
-			 uint16(0x0020):
-			statements = append(statements, command{opcode,datatypes.Data{}})
+			uint16(0x0004),
+			uint16(0x0005),
+			uint16(0x0006),
+			uint16(0x0007),
+			uint16(0x000C),
+			uint16(0x000D),
+			uint16(0x000E),
+			uint16(0x000F),
+			uint16(0x0010),
+			uint16(0x0011),
+			uint16(0x0014),
+			uint16(0x0015),
+			uint16(0x0016),
+			uint16(0x0017),
+			uint16(0x0001),
+			uint16(0x0008),
+			uint16(0x0009),
+			uint16(0x000A),
+			uint16(0x000B),
+			uint16(0x0018),
+			uint16(0x0019),
+			uint16(0x001A),
+			uint16(0x001B),
+			uint16(0x0012),
+			uint16(0x0013),
+			uint16(0xFFFF),
+			uint16(0x001C),
+			uint16(0x001D),
+			uint16(0x001E),
+			uint16(0x001F),
+			uint16(0x0002),
+			uint16(0x0020):
+			statements = append(statements, command{opcode, datatypes.Data{}})
 			continue
 		default:
 			//Opcode has a parameter
@@ -133,17 +133,17 @@ func Run(bytes []byte) int8 {
 
 				case compiler.Int16:
 					param.Type = datatypes.Int16
-					param.Value = int16(getUint16FromBytes(code[e], code[e + 1]))
+					param.Value = int16(getUint16FromBytes(code[e], code[e+1]))
 					e += 2
 
 				case compiler.Int32:
 					param.Type = datatypes.Int32
-					param.Value = int32(getUint32FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3]))
+					param.Value = int32(getUint32FromBytes(code[e], code[e+1], code[e+2], code[e+3]))
 					e += 4
 
 				case compiler.Int64:
 					param.Type = datatypes.Int64
-					param.Value = int64(getUint64FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7]))
+					param.Value = int64(getUint64FromBytes(code[e], code[e+1], code[e+2], code[e+3], code[e+4], code[e+5], code[e+6], code[e+7]))
 					e += 8
 				}
 			case compiler.Float:
@@ -152,7 +152,7 @@ func Run(bytes []byte) int8 {
 
 				switch floatSize {
 				case compiler.Float32:
-					bytes := []byte{code[e], code[e + 1], code[e + 2], code[e + 3]}
+					bytes := []byte{code[e], code[e+1], code[e+2], code[e+3]}
 					e += 4
 
 					bits := binary.LittleEndian.Uint32(bytes)
@@ -161,7 +161,7 @@ func Run(bytes []byte) int8 {
 					param.Value = math.Float32frombits(bits)
 
 				case compiler.Float64:
-					bytes := []byte{code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7]}
+					bytes := []byte{code[e], code[e+1], code[e+2], code[e+3], code[e+4], code[e+5], code[e+6], code[e+7]}
 					e += 8
 
 					bits := binary.LittleEndian.Uint64(bytes)
@@ -178,7 +178,7 @@ func Run(bytes []byte) int8 {
 
 				if val == 0x0 {
 					param.Value = false
-				}else {
+				} else {
 					param.Value = true
 				}
 			case compiler.Ptr:
@@ -192,7 +192,7 @@ func Run(bytes []byte) int8 {
 				param.Value = getNextUint64(code, &e)
 			}
 
-			statements = append(statements, command{opcode,param})
+			statements = append(statements, command{opcode, param})
 		}
 	}
 

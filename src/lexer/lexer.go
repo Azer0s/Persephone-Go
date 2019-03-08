@@ -53,10 +53,10 @@ func Lex(lines []string) (tokens []types.Token) {
 				discard()
 			}
 
-			if current.Text == "true" || current.Text == "false"{
+			if current.Text == "true" || current.Text == "false" {
 				current.Kind = types.Bit
 			}
-		} else if isNumber.MatchString(string(letter())) || (letter() == rune('-') && isNumber.MatchString(string(code[index + 1]))){
+		} else if isNumber.MatchString(string(letter())) || (letter() == rune('-') && isNumber.MatchString(string(code[index+1]))) {
 			if letter() == rune('-') {
 				consume()
 			}

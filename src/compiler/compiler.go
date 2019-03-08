@@ -299,8 +299,8 @@ func Compile(root types.Root, outname string) int {
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 64)
 
 					bits := math.Float64bits(num)
-					bytes := make([]byte,8)
-					binary.LittleEndian.PutUint64(bytes,bits)
+					bytes := make([]byte, 8)
+					binary.LittleEndian.PutUint64(bytes, bits)
 
 					write(bytes[:])
 				default: //if size isn't stated, use 32 bit
@@ -310,8 +310,8 @@ func Compile(root types.Root, outname string) int {
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 32)
 
 					bits := math.Float32bits(float32(num))
-					bytes := make([]byte,4)
-					binary.LittleEndian.PutUint32(bytes,bits)
+					bytes := make([]byte, 4)
+					binary.LittleEndian.PutUint32(bytes, bits)
 
 					write(bytes[:])
 				}

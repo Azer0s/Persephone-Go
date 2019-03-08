@@ -19,7 +19,7 @@ func GetConfig(args []string) (file, workdir, out string, compile, isBinary bool
 			compile = true
 			out = args[k+1]
 
-		case "--binary","-b":
+		case "--binary", "-b":
 			isBinary = true
 		}
 	}
