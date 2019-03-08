@@ -1,7 +1,7 @@
 package datatypes
 
 //DataType ...Type for enum for Persephone variable types
-type DataType int16
+type DataType uint16
 
 // Enum for Persephone variable types
 const (
@@ -20,7 +20,7 @@ const (
 	StringASCII   DataType = 0x201
 	StringUnicode DataType = 0x202
 
-	Variable DataType = 0xFFF
+	Variable DataType = 0xFFFF
 )
 
 //Data ...Type for storing variables

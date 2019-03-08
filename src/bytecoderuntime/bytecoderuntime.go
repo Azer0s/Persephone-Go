@@ -7,40 +7,15 @@ import (
 	"math"
 )
 
-var noParamOpcodes = map[uint16]string{
-	uint16(0x0003) : "add",
-	uint16(0x0004) : "sub",
-	uint16(0x0005) : "mul",
-	uint16(0x0006) : "div",
-	uint16(0x0007) : "mod",
-	uint16(0x000C) : "andi",
-	uint16(0x000D) : "ori",
-	uint16(0x000E) : "xori",
-	uint16(0x000F) : "noti",
-	uint16(0x0010) : "shl",
-	uint16(0x0011) : "shr",
-	uint16(0x0014) : "addf",
-	uint16(0x0015) : "subf",
-	uint16(0x0016) : "mulf",
-	uint16(0x0017) : "divf",
-	uint16(0x0001) : "pop",
-	uint16(0x0008) : "ge",
-	uint16(0x0009) : "le",
-	uint16(0x000A) : "gt",
-	uint16(0x000B) : "lt",
-	uint16(0x0018) : "gef",
-	uint16(0x0019) : "lef",
-	uint16(0x001A) : "gtf",
-	uint16(0x001B) : "ltf",
-	uint16(0x0012) : "inc",
-	uint16(0x0013) : "dec",
-	uint16(0xFFFF) : "cbase",
-	uint16(0x001C) : "and",
-	uint16(0x001D) : "or",
-	uint16(0x001E) : "xor",
-	uint16(0x001F) : "not",
-	uint16(0x0002) : "ret",
-	uint16(0x0020) : "conc",
+type command struct {
+	opcode uint16
+	param datatypes.Data
+}
+
+func getNextUint64(code []byte, e *int) uint64 {
+	val := getUint64FromBytes(code[*e], code[(*e) + 1], code[(*e) + 2], code[(*e) + 3], code[(*e) + 4], code[(*e) + 5], code[(*e) + 6], code[(*e) + 7])
+	*e += 8
+	return val
 }
 
 func getUint64FromBytes(a, b, c, d, e, f, g, h byte) uint64 {
@@ -90,15 +65,52 @@ func Run(bytes []byte) int8 {
 
 	code := bytes[labelPtr:]
 
-	for e := 0; e < len(code); e++ {
+	statements := make([]command, 0)
+
+	for e := 0; e < len(code);{
 		opcode := getUint16FromBytes(code[e],code[e + 1])
 		e += 2
 
 		parameter := false
 
-		if _, ok := noParamOpcodes[opcode]; ok{
-			parameter = false
-		}else{
+		switch opcode {
+		case uint16(0x0003),
+			 uint16(0x0004),
+			 uint16(0x0005),
+			 uint16(0x0006),
+			 uint16(0x0007),
+			 uint16(0x000C),
+			 uint16(0x000D),
+			 uint16(0x000E),
+			 uint16(0x000F),
+			 uint16(0x0010),
+			 uint16(0x0011),
+			 uint16(0x0014),
+			 uint16(0x0015),
+			 uint16(0x0016),
+			 uint16(0x0017),
+			 uint16(0x0001),
+			 uint16(0x0008),
+			 uint16(0x0009),
+			 uint16(0x000A),
+			 uint16(0x000B),
+			 uint16(0x0018),
+			 uint16(0x0019),
+			 uint16(0x001A),
+			 uint16(0x001B),
+			 uint16(0x0012),
+			 uint16(0x0013),
+			 uint16(0xFFFF),
+			 uint16(0x001C),
+			 uint16(0x001D),
+			 uint16(0x001E),
+			 uint16(0x001F),
+			 uint16(0x0002),
+			 uint16(0x0020):
+			statements = append(statements, command{opcode,datatypes.Data{}})
+			continue
+		default:
+			//Opcode has a parameter
 			parameter = true
 		}
 
@@ -134,7 +146,6 @@ func Run(bytes []byte) int8 {
 					param.Value = int64(getUint64FromBytes(code[e], code[e + 1], code[e + 2], code[e + 3], code[e + 4], code[e + 5], code[e + 6], code[e + 7]))
 					e += 8
 				}
-
 			case compiler.Float:
 				floatSize := code[e]
 				e++
@@ -180,6 +191,8 @@ func Run(bytes []byte) int8 {
 				param.Type = datatypes.Variable
 				param.Value = getNextUint64(code, &e)
 			}
+
+			statements = append(statements, command{opcode,param})
 		}
 	}
 
