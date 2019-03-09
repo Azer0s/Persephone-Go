@@ -12,12 +12,6 @@ type command struct {
 	param  datatypes.Data
 }
 
-func getNextUint64(code []byte, e *int) uint64 {
-	val := getUint64FromBytes(code[*e], code[(*e)+1], code[(*e)+2], code[(*e)+3], code[(*e)+4], code[(*e)+5], code[(*e)+6], code[(*e)+7])
-	*e += 8
-	return val
-}
-
 func getUint64FromBytes(a, b, c, d, e, f, g, h byte) uint64 {
 	return (uint64(a) << 56) + (uint64(b) << 48) + (uint64(c) << 40) + (uint64(d) << 32) + (uint64(e) << 24) + (uint64(f) << 16) + (uint64(g) << 8) + uint64(h)
 }
@@ -169,8 +163,16 @@ func Run(bytes []byte) int8 {
 					param.Type = datatypes.Float64
 					param.Value = math.Float64frombits(bits)
 				}
-			case compiler.StringA:
-			case compiler.StringU:
+			case compiler.StringA, compiler.StringU:
+				size := getNextUint64(code, &e)
+				bytes := code[e:(uint64(e)+size)]
+				param.Value = string(bytes)
+
+				if paramType == compiler.StringA {
+					param.Type = datatypes.StringASCII
+				}else {
+					param.Type = datatypes.StringUnicode
+				}
 			case compiler.Bit:
 				param.Type = datatypes.Bit
 				val := code[e]
