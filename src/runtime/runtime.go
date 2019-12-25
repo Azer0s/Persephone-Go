@@ -1,11 +1,14 @@
 package runtime
 
 import (
-	"../datatypes"
-	"../types"
+	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+
+	"../datatypes"
+	"../types"
 )
 
 func replaceAtIndex(in string, r rune, i int) string {
@@ -500,12 +503,15 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 		num = int64(val.Value.(int32))
 	}
 
-	var v datatypes.Data
-	s, v = s.Pop()
-
 	switch types.Op(num) {
 	case types.Print:
+		var v datatypes.Data
+		s, v = s.Pop()
 		fmt.Println(v.Value)
+	case types.Read:
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		s = s.Push(datatypes.Data{Value: text, Type: datatypes.StringASCII})
 	}
 
 	return s

@@ -8,6 +8,7 @@ import (
 	"regexp"
 )
 
+//ReadFile reads file and does preprocessing
 func ReadFile(filename, workdir string) (code []string) {
 	file, err := os.Open(filename)
 	if err != nil {

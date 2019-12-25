@@ -1,12 +1,13 @@
 package compiler
 
 import (
-	"../types"
 	"encoding/binary"
 	"math"
 	"os"
 	"strconv"
 	"strings"
+
+	"../types"
 )
 
 var opcodes = map[string]uint16{
@@ -165,13 +166,14 @@ func getUint16Bytes(val uint16) []byte {
 	}
 }
 
-func isAscii(s string) bool {
+func isASCII(s string) bool {
 	f := func(r rune) bool {
 		return r < 'A' || r > 'z'
 	}
 	return !(strings.IndexFunc(s, f) != -1)
 }
 
+// Compile compiles an AST to Persephone bytecode
 func Compile(root types.Root, outname string) int {
 	for e := range root.Labels {
 		labels[e] = currentLabel
@@ -274,7 +276,7 @@ func Compile(root types.Root, outname string) int {
 			case types.String:
 				rawString := strings.Trim(root.Commands[e].Param.Text, "\"")
 
-				if isAscii(rawString) {
+				if isASCII(rawString) {
 					write([]byte{StringA})
 					stringBytes := []byte(rawString)
 					write(getUint64Bytes(uint64(len(stringBytes))))

@@ -165,12 +165,12 @@ func Run(bytes []byte) int8 {
 				}
 			case compiler.StringA, compiler.StringU:
 				size := getNextUint64(code, &e)
-				bytes := code[e:(uint64(e)+size)]
+				bytes := code[e:(uint64(e) + size)]
 				param.Value = string(bytes)
 
 				if paramType == compiler.StringA {
 					param.Type = datatypes.StringASCII
-				}else {
+				} else {
 					param.Type = datatypes.StringUnicode
 				}
 			case compiler.Bit:
