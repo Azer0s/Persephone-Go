@@ -12,4 +12,4 @@ shl # left shift var_01 (16) by 4
 store var_01 # assign shift result to var_01
 
 ldi32v var_01
-syscall 0x01 # print var_01
+syscall 0x10 # print var_01

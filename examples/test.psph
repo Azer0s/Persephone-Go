@@ -26,9 +26,9 @@ ldi32c 0
 ldi32c 1
 add
 
-syscall 0x01
+syscall 0x10
 
 cbase
 dcsa "Hello world"
 ldsac 0
-syscall 0x01
+syscall 0x10

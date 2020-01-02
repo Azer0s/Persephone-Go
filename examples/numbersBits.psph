@@ -7,4 +7,4 @@ dcb true
 ldbc 1
 ldbc 0
 xor
-syscall 0x01
+syscall 0x10

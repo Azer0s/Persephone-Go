@@ -5,4 +5,4 @@ ldi8c 0
 store char
 
 ldsav char
-syscall 0x01
+syscall 0x10

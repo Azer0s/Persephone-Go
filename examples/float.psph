@@ -6,4 +6,4 @@ dcf 23.4445[64] # gets cast into float32
 ldfc 0
 ldfc 1
 addf
-syscall 0x01
+syscall 0x10

@@ -3,7 +3,7 @@ dcsa "Hello world"
 jmp skp_print
 
 print:
-    syscall 0x01
+    syscall 0x10
     ret
 
 skp_print:

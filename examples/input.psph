@@ -1,4 +1,4 @@
-dci8 0x02
+dci8 0x20
 
 v_ptr read
 ldi8c 0
@@ -6,4 +6,4 @@ store read
 
 cbase
 syscall [read]
-syscall 0x1
+syscall 16

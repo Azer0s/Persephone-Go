@@ -9,6 +9,8 @@ import (
 
 	"../datatypes"
 	"../types"
+
+	"github.com/eiannone/keyboard"
 )
 
 func replaceAtIndex(in string, r rune, i int) string {
@@ -530,6 +532,8 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 	switch command.Param.Kind {
 	case types.HexNumber:
 		num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
+	case types.Number:
+		num, _ = strconv.ParseInt(command.Param.Text, 10, 8)
 	case types.Pointer:
 		val := vars[strings.Trim(strings.Trim(command.Param.Text, "]"), "[")]
 
@@ -544,10 +548,22 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 	case types.Print:
 		var v datatypes.Data
 		s, v = s.Pop()
-		fmt.Println(v.Value)
+		fmt.Print(v.Value)
 	case types.Read:
+		ch, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			panic(err)
+		}
+		val := string(ch)
+		fmt.Print(val)
+		s = s.Push(datatypes.Data{Value: val, Type: datatypes.StringASCII})
+	case types.Println:
+		var v datatypes.Data
+		s, v = s.Pop()
+		fmt.Println(v.Value)
+	case types.Readln:
 		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadByte()
+		text, _ := reader.ReadBytes('\n')
 		s = s.Push(datatypes.Data{Value: string(text), Type: datatypes.StringASCII})
 	}
 

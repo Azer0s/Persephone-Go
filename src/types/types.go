@@ -29,9 +29,11 @@ const (
 
 //Print syscall
 const (
-	Fork  Op = 0x0
-	Print Op = 0x1
-	Read  Op = 0x2
+	Fork    Op = 0x0
+	Print   Op = 0x1
+	Read    Op = 0x2
+	Println Op = 0x10
+	Readln  Op = 0x20
 )
 
 //Kind AST kinds
