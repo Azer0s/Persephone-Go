@@ -5,7 +5,7 @@ import (
 )
 
 //GetConfig ...Parses args into config values
-func GetConfig(args []string) (file, workdir, out string, compile bool) {
+func GetConfig(args []string) (file, workdir, out string, compile, isBinary bool) {
 
 	for k, v := range args {
 		switch v {
@@ -18,6 +18,9 @@ func GetConfig(args []string) (file, workdir, out string, compile bool) {
 		case "--compile", "-c":
 			compile = true
 			out = args[k+1]
+
+		case "--binary", "-b":
+			isBinary = true
 		}
 	}
 

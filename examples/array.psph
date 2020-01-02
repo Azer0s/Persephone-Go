@@ -16,4 +16,4 @@ add
 store arr_ptr # arr_ptr is 0x2
 
 ldi32v [arr_ptr] # load var2 onto stack
-syscall 0x01
+syscall 0x10

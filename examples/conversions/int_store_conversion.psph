@@ -1,0 +1,8 @@
+v_stringa a
+dci8 65
+
+ldi8c 0
+store a
+
+ldsav a
+syscall 0x10

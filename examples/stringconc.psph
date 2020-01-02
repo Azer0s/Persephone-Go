@@ -5,4 +5,4 @@ ldi32c 1
 ldsac 0
 conc
 
-syscall 0x01
+syscall 0x10

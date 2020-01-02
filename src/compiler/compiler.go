@@ -1,15 +1,17 @@
 package compiler
 
 import (
-	"../types"
 	"encoding/binary"
 	"math"
 	"os"
 	"strconv"
 	"strings"
+
+	"../types"
 )
 
 var opcodes = map[string]uint16{
+	"store":     uint16(0x0000),
 	"v_int8":    uint16(0x0118),
 	"v_int16":   uint16(0x0110),
 	"v_int32":   uint16(0x0120),
@@ -164,13 +166,14 @@ func getUint16Bytes(val uint16) []byte {
 	}
 }
 
-func isAscii(s string) bool {
+func isASCII(s string) bool {
 	f := func(r rune) bool {
 		return r < 'A' || r > 'z'
 	}
 	return !(strings.IndexFunc(s, f) != -1)
 }
 
+// Compile compiles an AST to Persephone bytecode
 func Compile(root types.Root, outname string) int {
 	for e := range root.Labels {
 		labels[e] = currentLabel
@@ -221,6 +224,15 @@ func Compile(root types.Root, outname string) int {
 			write(getUint64Bytes(labels[root.Commands[e].Param.Text]))
 		} else {
 			switch root.Commands[e].Param.Kind {
+			case types.Bit:
+				write([]byte{Bit})
+				switch root.Commands[e].Param.Text {
+				case "true":
+					write([]byte{0x1})
+				case "false":
+					write([]byte{0x0})
+				}
+
 			case types.Name:
 				write([]byte{Variable})
 
@@ -264,7 +276,7 @@ func Compile(root types.Root, outname string) int {
 			case types.String:
 				rawString := strings.Trim(root.Commands[e].Param.Text, "\"")
 
-				if isAscii(rawString) {
+				if isASCII(rawString) {
 					write([]byte{StringA})
 					stringBytes := []byte(rawString)
 					write(getUint64Bytes(uint64(len(stringBytes))))
@@ -288,20 +300,22 @@ func Compile(root types.Root, outname string) int {
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 64)
 
-					var buf [8]byte
-					binary.BigEndian.PutUint64(buf[:], math.Float64bits(num))
+					bits := math.Float64bits(num)
+					bytes := make([]byte, 8)
+					binary.LittleEndian.PutUint64(bytes, bits)
 
-					write(buf[:])
+					write(bytes[:])
 				default: //if size isn't stated, use 32 bit
 					write([]byte{Float32})
 
 					var num float64
 					num, _ = strconv.ParseFloat(root.Commands[e].Param.Text, 32)
 
-					var buf [4]byte
-					binary.BigEndian.PutUint32(buf[:], math.Float32bits(float32(num)))
+					bits := math.Float32bits(float32(num))
+					bytes := make([]byte, 4)
+					binary.LittleEndian.PutUint32(bytes, bits)
 
-					write(buf[:])
+					write(bytes[:])
 				}
 			}
 		}

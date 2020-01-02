@@ -14,4 +14,4 @@ dci8 65
 ldi8c 2
 
 setc [h_ptr]
-syscall 0x01
+syscall 0x10

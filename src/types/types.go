@@ -1,7 +1,9 @@
 package types
 
+//Op operation type
 type Op int8
 
+//Operation types
 const (
 	Add Op = 0x0
 	Sub Op = 0x1
@@ -25,12 +27,19 @@ const (
 	Dec Op = 0x31
 )
 
+//Print syscall
 const (
-	Print Op = 0x1
+	Fork    Op = 0x0
+	Print   Op = 0x1
+	Read    Op = 0x2
+	Println Op = 0x10
+	Readln  Op = 0x20
 )
 
+//Kind AST kinds
 type Kind string
 
+//AST kinds
 const (
 	Name      Kind = "name"
 	Number    Kind = "number"
@@ -40,24 +49,29 @@ const (
 	Pointer   Kind = "pointer"
 	Label     Kind = "label"
 	Unknown   Kind = "unknown"
+	Bit       Kind = "bit"
 )
 
+//Token Lexeme
 type Token struct {
 	Kind Kind
 	Size string
 	Text string
 }
 
+//Root AST root node
 type Root struct {
 	Commands []Command
 	Labels   map[string]int
 }
 
+//Function function node
 type Function struct {
 	Name     Token
 	Commands []Command
 }
 
+//Command Command node
 type Command struct {
 	Single         bool
 	Command, Param Token

@@ -21,4 +21,4 @@ ldi32c 0
 store [arr_ptr] # store stack value in var2
 
 ldi32v [arr_ptr] # load var2 onto stack
-syscall 0x01
+syscall 0x10

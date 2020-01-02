@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./bytecoderuntime"
 	"./compiler"
 	"./configuration"
 	"./filereader"
@@ -14,17 +15,32 @@ import (
 func main() { os.Exit(mainReturnWithCode()) }
 
 func mainReturnWithCode() int {
-	filename, workdir, out, compile := configuration.GetConfig(os.Args[1:])
+	filename, workDir, out, compile, isBinary := configuration.GetConfig(os.Args[1:])
 
-	if filename == "" || workdir == "" {
+	if filename == "" || workDir == "" {
 		fmt.Println("Invalid parameters!")
 		return 1
 	}
 
-	fmt.Println("Working directory: " + workdir)
+	if isBinary {
+		f, err := os.Open(filename)
+
+		if err != nil {
+			panic(err)
+		}
+
+		stat, err := f.Stat()
+
+		buf := make([]byte, stat.Size())
+		f.Read(buf)
+
+		return int(bytecoderuntime.Run(buf))
+	}
+
+	fmt.Println("Working directory: " + workDir)
 	fmt.Println("File: " + filename)
 
-	code := filereader.ReadFile(filename, workdir)
+	code := filereader.ReadFile(filename, workDir)
 	commands := lexer.Lex(code)
 	root := parser.Parse(commands)
 

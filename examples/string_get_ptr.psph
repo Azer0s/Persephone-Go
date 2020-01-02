@@ -13,4 +13,4 @@ store h_ptr
 dci8 1
 ldi8c 1
 getc [h_ptr]
-syscall 0x01
+syscall 0x10

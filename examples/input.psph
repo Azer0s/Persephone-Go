@@ -1,0 +1,9 @@
+dci8 0x20
+
+v_ptr read
+ldi8c 0
+store read
+
+cbase
+syscall [read]
+syscall 16

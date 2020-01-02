@@ -1,8 +1,9 @@
 package parser
 
 import (
-	"../types"
 	"fmt"
+
+	"../types"
 )
 
 var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase", "and", "or", "xor", "not", "ret", "conc"}
@@ -36,17 +37,17 @@ func parseStatement() (command types.Command) {
 		command.Command = tokens[index]
 		index++
 
-		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer {
+		if tokens[index].Kind == types.Name || tokens[index].Kind == types.Number || tokens[index].Kind == types.HexNumber || tokens[index].Kind == types.Float || tokens[index].Kind == types.String || tokens[index].Kind == types.Pointer || tokens[index].Kind == types.Bit {
 			command.Param = tokens[index]
 			return
 		}
 
 		fmt.Println("Expected name, number, hexnumber, flaot, string or pointer, got: " + tokens[index].Kind)
 		return types.Command{}
-	} else {
-		fmt.Println("Expected name, got: " + tokens[index].Kind)
-		return types.Command{}
 	}
+
+	fmt.Println("Expected name, got: " + tokens[index].Kind)
+	return types.Command{}
 }
 
 //Parse ...Parses a list of tokens into an AST

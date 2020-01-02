@@ -4,7 +4,7 @@ ldi32c 0
 store var0
 
 ldi32v var0
-syscall 0x01
+syscall 0x10
 
 delete var0
 cbase
@@ -15,4 +15,4 @@ ldi32c 0
 store var0
 
 ldi32v var0
-syscall 0x01
+syscall 0x10

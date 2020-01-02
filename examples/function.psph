@@ -12,10 +12,10 @@ store status
 # status and text now have values returned by function_that_returns_status_and_text
 
 ldsav text
-syscall 0x01
+syscall 0x10
 
 ldi32v status
-syscall 0x01
+syscall 0x10
 
 jmp exit
 
