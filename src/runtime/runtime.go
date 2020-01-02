@@ -46,6 +46,27 @@ func (s stack) Pop() (stack, datatypes.Data) {
 	return s[:l-1], s[l-1]
 }
 
+func getBoolFromValue(val datatypes.Data) bool {
+	if val.Type >= datatypes.Ptr && val.Type <= datatypes.Int64 {
+		switch val.Type {
+		case datatypes.Ptr:
+			return int64(val.Value.(int32)) != 0
+		case datatypes.Int8:
+			return int64(val.Value.(int8)) != 0
+		case datatypes.Int16:
+			return int64(val.Value.(int16)) != 0
+		case datatypes.Int32:
+			return int64(val.Value.(int32)) != 0
+		case datatypes.Int64:
+			return val.Value.(int64) != 0
+		}
+	} else {
+		return val.Value.(bool)
+	}
+
+	panic("Variable is neither truthy nor falsy!")
+}
+
 func pushIntVar(val int64, d datatypes.DataType, s stack) stack {
 	switch d {
 	case datatypes.Ptr:
@@ -841,16 +862,14 @@ func Run(root types.Root) int8 {
 			case "jmpt":
 				var val datatypes.Data
 				s, val = s.Pop()
-
-				if val.Value.(bool) {
+				if getBoolFromValue(val) {
 					lbl := getByPtr(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
 			case "jmpf":
 				var val datatypes.Data
 				s, val = s.Pop()
-
-				if !val.Value.(bool) {
+				if !getBoolFromValue(val) {
 					lbl := getByPtr(root.Commands[e], v)
 					e = root.Labels[lbl] - 1
 				}
