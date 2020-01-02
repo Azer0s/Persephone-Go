@@ -1,7 +1,9 @@
 #!/bin/sh
 for f in examples/*.psph
 do
-  ./bin/persephone -i $f <<<EOF test EOF
+  if [[ "$f" != "examples/input.psph" ]]; then
+    ./bin/persephone -i $f
+  fi
 done
 
 for f in examples/conversions/*.psph
