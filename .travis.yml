@@ -2,5 +2,6 @@ language: go
 go:
   - "1.10"
 script:
+  - go get -u github.com/eiannone/keyboard
   - make
   - make test
