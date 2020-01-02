@@ -48,18 +48,7 @@ func (s stack) Pop() (stack, datatypes.Data) {
 
 func getBoolFromValue(val datatypes.Data) bool {
 	if val.Type >= datatypes.Ptr && val.Type <= datatypes.Int64 {
-		switch val.Type {
-		case datatypes.Ptr:
-			return int64(val.Value.(int32)) != 0
-		case datatypes.Int8:
-			return int64(val.Value.(int8)) != 0
-		case datatypes.Int16:
-			return int64(val.Value.(int16)) != 0
-		case datatypes.Int32:
-			return int64(val.Value.(int32)) != 0
-		case datatypes.Int64:
-			return val.Value.(int64) != 0
-		}
+		return getInt64(val) != 0
 	} else {
 		return val.Value.(bool)
 	}
