@@ -428,21 +428,40 @@ Load value on stack
 
 func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack {
 	name := getByPtr(command, v)
+	t := v[name].Type
 
-	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && v[name].Type >= datatypes.StringASCII && v[name].Type <= datatypes.StringUnicode {
+	//Load int8 as string
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t == datatypes.Int8 {
+		s = s.Push(datatypes.Data{
+			Value: string(v[name].Value.(int8)),
+			Type:  d,
+		})
+		return s
+	}
+
+	//Load string as int8
+	if d == datatypes.Int8 && t >= datatypes.StringASCII && t <= datatypes.StringUnicode && len(v[name].Value.(string)) == 1 {
+		s = s.Push(datatypes.Data{
+			Value: int8(v[name].Value.(string)[0]),
+			Type:  t,
+		})
+		return s
+	}
+
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t >= datatypes.StringASCII && t <= datatypes.StringUnicode {
 		s = s.Push(v[name])
 		return s
 	}
 
-	if d >= datatypes.Float32 && d <= datatypes.Float64 && v[name].Type >= datatypes.Float32 && v[name].Type <= datatypes.Float64 {
+	if d >= datatypes.Float32 && d <= datatypes.Float64 && t >= datatypes.Float32 && t <= datatypes.Float64 {
 		return pushFloatVar(getFloat64(v[name]), d, s)
 	}
 
-	if d >= datatypes.Ptr && d <= datatypes.Int64 && v[name].Type >= datatypes.Ptr && v[name].Type <= datatypes.Int64 {
+	if d >= datatypes.Ptr && d <= datatypes.Int64 && t >= datatypes.Ptr && t <= datatypes.Int64 {
 		return pushIntVar(getInt64(v[name]), d, s)
 	}
 
-	if d == datatypes.Bit && v[name].Type == datatypes.Bit {
+	if d == datatypes.Bit && t == datatypes.Bit {
 		s = s.Push(v[name])
 		return s
 	}
@@ -461,6 +480,24 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 	}
 
 	index += cbase[min]
+
+	//Load string as int8
+	if c[index].Type >= datatypes.StringASCII && c[index].Type <= datatypes.StringUnicode && d == datatypes.Int8 && len(c[index].Value.(string)) == 1 {
+		s = s.Push(datatypes.Data{
+			Value: int8(c[index].Value.(string)[0]),
+			Type:  d,
+		})
+		return s
+	}
+
+	//Load int8 as string
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && c[index].Type == datatypes.Int8 {
+		s = s.Push(datatypes.Data{
+			Value: string(c[index].Value.(int8)),
+			Type:  d,
+		})
+		return s
+	}
 
 	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && c[index].Type >= datatypes.StringASCII && c[index].Type <= datatypes.StringUnicode {
 		s = s.Push(c[index])
@@ -510,8 +547,8 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 		fmt.Println(v.Value)
 	case types.Read:
 		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		s = s.Push(datatypes.Data{Value: text, Type: datatypes.StringASCII})
+		text, _ := reader.ReadByte()
+		s = s.Push(datatypes.Data{Value: string(text), Type: datatypes.StringASCII})
 	}
 
 	return s
@@ -527,14 +564,24 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 	var t datatypes.Data
 	s, t = s.Pop()
 
+	//Store string as int8
+	if d == datatypes.Int8 && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode && len(t.Value.(string)) == 1 {
+		v[name] = datatypes.Data{
+			Value: int8(t.Value.(string)[0]),
+			Type:  d,
+		}
+		return s, v
+	}
+
 	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode {
 		v[name] = t
 		return s, v
 	}
 
+	//Store int8 as string
 	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode {
 		if t.Type == datatypes.Int8 {
-			v[name] = datatypes.Data{Value: string(t.Value.(int8)), Type: v[name].Type}
+			v[name] = datatypes.Data{Value: string(t.Value.(int8)), Type: d}
 			return s, v
 		}
 	}
