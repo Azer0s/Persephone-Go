@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 for f in examples/*.psph
 do
   if [[ "$f" != "examples/input.psph" ]]; then
