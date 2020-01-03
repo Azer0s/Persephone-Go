@@ -6,7 +6,7 @@ import (
 	"../types"
 )
 
-var noArgCommands = []string{"add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase", "and", "or", "xor", "not", "ret", "conc"}
+var noArgCommands = []string{"nop", "add", "sub", "mul", "div", "mod", "andi", "ori", "xori", "noti", "shl", "shr", "addf", "subf", "mulf", "divf", "pop", "ge", "le", "gt", "lt", "gef", "lef", "gtf", "ltf", "inc", "dec", "cbase", "and", "or", "xor", "not", "ret", "conc"}
 
 var tokens []types.Token
 var index int

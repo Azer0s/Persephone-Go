@@ -11,6 +11,7 @@ import (
 )
 
 var opcodes = map[string]uint16{
+	"nop":       uint16(0x1000),
 	"store":     uint16(0x0000),
 	"v_int8":    uint16(0x0118),
 	"v_int16":   uint16(0x0110),
