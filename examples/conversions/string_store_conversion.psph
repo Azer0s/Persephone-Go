@@ -1,4 +1,4 @@
-v_int8 a
+v_uint8 a
 dcsa "A"
 ldsac 0
 store a

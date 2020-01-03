@@ -1,6 +1,6 @@
-dci8 65
-v_int8 a
-ldi8c 0
+dcu8 65
+v_uint8 a
+ldu8c 0
 store a
 
 ldsav a

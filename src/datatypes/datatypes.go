@@ -7,12 +7,17 @@ type DataType uint16
 const (
 	Label DataType = 0x0
 	Bit   DataType = 0x01
-	Ptr   DataType = 0x02
 
 	Int8  DataType = 0x08
 	Int16 DataType = 0x16
 	Int32 DataType = 0x32
 	Int64 DataType = 0x64
+
+	Ptr    DataType = 0x80
+	Uint8  DataType = 0x081
+	Uint16 DataType = 0x161
+	Uint32 DataType = 0x321
+	Uint64 DataType = 0x641
 
 	Float32 DataType = 0x132
 	Float64 DataType = 0x164

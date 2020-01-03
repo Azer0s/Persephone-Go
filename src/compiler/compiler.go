@@ -13,11 +13,16 @@ import (
 var opcodes = map[string]uint16{
 	"nop":       uint16(0x1000),
 	"store":     uint16(0x0000),
-	"v_int8":    uint16(0x0118),
+	"v_int8":    uint16(0x0108),
 	"v_int16":   uint16(0x0110),
 	"v_int32":   uint16(0x0120),
 	"v_int":     uint16(0x0120),
 	"v_int64":   uint16(0x0140),
+	"v_uint8":   uint16(0x1108),
+	"v_uint16":  uint16(0x1110),
+	"v_uint32":  uint16(0x1120),
+	"v_uint":    uint16(0x1120),
+	"v_uint64":  uint16(0x1140),
 	"v_float32": uint16(0x0121),
 	"v_float":   uint16(0x0121),
 	"v_float64": uint16(0x0141),
@@ -32,6 +37,11 @@ var opcodes = map[string]uint16{
 	"dci32":     uint16(0x0220),
 	"dci":       uint16(0x0220),
 	"dci64":     uint16(0x0240),
+	"dcu8":      uint16(0x1218),
+	"dcu16":     uint16(0x1210),
+	"dcu32":     uint16(0x1220),
+	"dcu":       uint16(0x1220),
+	"dcu64":     uint16(0x1240),
 	"dcf32":     uint16(0x0221),
 	"dcf":       uint16(0x0221),
 	"dcf64":     uint16(0x0241),
@@ -44,6 +54,11 @@ var opcodes = map[string]uint16{
 	"ldi32v":    uint16(0x0320),
 	"ldiv":      uint16(0x0320),
 	"ldi64v":    uint16(0x0340),
+	"ldu8v":     uint16(0x1318),
+	"ldu16v":    uint16(0x1310),
+	"ldu32v":    uint16(0x1320),
+	"lduv":      uint16(0x1320),
+	"ldu64v":    uint16(0x1340),
 	"ldf32v":    uint16(0x0321),
 	"ldfv":      uint16(0x0321),
 	"ldf64v":    uint16(0x0341),
@@ -57,6 +72,11 @@ var opcodes = map[string]uint16{
 	"ldi32c":    uint16(0x0420),
 	"ldic":      uint16(0x0420),
 	"ldi64c":    uint16(0x0440),
+	"ldu8c":     uint16(0x1418),
+	"ldu16c":    uint16(0x1410),
+	"ldu32c":    uint16(0x1420),
+	"lduc":      uint16(0x1420),
+	"ldu64c":    uint16(0x1440),
 	"ldf32c":    uint16(0x0421),
 	"ldfc":      uint16(0x0421),
 	"ldf64c":    uint16(0x0441),
@@ -110,6 +130,7 @@ var opcodes = map[string]uint16{
 
 //Value prefixes for parameters
 const (
+	Uint     = byte(uint8(0x0))
 	Int      = byte(uint8(0x1))
 	Float    = byte(uint8(0x2))
 	StringA  = byte(uint8(0x3))
@@ -212,10 +233,13 @@ func Compile(root types.Root, outname string) int {
 		}
 
 		isJmp := false
+		isUint := false
 
 		switch root.Commands[e].Command.Text {
 		case "call", "jmp", "jmpt", "jmpf":
 			isJmp = true
+		case "dcu8", "dcu16", "dcu32", "dcu", "dcu64":
+			isUint = true
 		}
 
 		write(getUint16Bytes(opcodes[root.Commands[e].Command.Text]))
@@ -245,22 +269,43 @@ func Compile(root types.Root, outname string) int {
 				write(getUint64Bytes(variables[root.Commands[e].Param.Text]))
 
 			case types.HexNumber, types.Number:
-				write([]byte{Int})
-				var num int64
-				num, _ = strconv.ParseInt(root.Commands[e].Param.Text, 0, 64)
+				if isUint {
+					isUint = false
+					write([]byte{Uint})
+					var num uint64
+					num, _ = strconv.ParseUint(root.Commands[e].Param.Text, 0, 64)
 
-				if num >= -128 && num <= 127 {
-					write([]byte{Int8})
-					write([]byte{byte(int8(num))})
-				} else if num >= -32768 && num <= 32767 {
-					write([]byte{Int16})
-					write(getUint16Bytes(uint16(num)))
-				} else if num >= -2147483648 && num <= 2147483647 {
-					write([]byte{Int32})
-					write(getUint32Bytes(uint32(num)))
+					if num <= 255 {
+						write([]byte{Int8})
+						write([]byte{byte(int8(num))})
+					} else if num <= 65535 {
+						write([]byte{Int16})
+						write(getUint16Bytes(uint16(num)))
+					} else if num <= 4294967295 {
+						write([]byte{Int32})
+						write(getUint32Bytes(uint32(num)))
+					} else {
+						write([]byte{Int64})
+						write(getUint64Bytes(num))
+					}
 				} else {
-					write([]byte{Int64})
-					write(getUint64Bytes(uint64(num)))
+					write([]byte{Int})
+					var num int64
+					num, _ = strconv.ParseInt(root.Commands[e].Param.Text, 0, 64)
+
+					if num >= -128 && num <= 127 {
+						write([]byte{Int8})
+						write([]byte{byte(int8(num))})
+					} else if num >= -32768 && num <= 32767 {
+						write([]byte{Int16})
+						write(getUint16Bytes(uint16(num)))
+					} else if num >= -2147483648 && num <= 2147483647 {
+						write([]byte{Int32})
+						write(getUint32Bytes(uint32(num)))
+					} else {
+						write([]byte{Int64})
+						write(getUint64Bytes(uint64(num)))
+					}
 				}
 
 			case types.Pointer:

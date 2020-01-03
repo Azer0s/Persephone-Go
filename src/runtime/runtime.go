@@ -1,19 +1,18 @@
 package runtime
 
 import (
+	"../datatypes"
+	"../types"
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
-	"../datatypes"
-	"../types"
-
 	"github.com/eiannone/keyboard"
 )
 
-func replaceAtIndex(in string, r rune, i int) string {
+func replaceAtIndex(in string, r rune, i uint64) string {
 	out := []rune(in)
 	out[i] = r
 	return string(out)
@@ -31,7 +30,7 @@ var constants []datatypes.Data
 type nop struct {
 }
 
-func (n nop) op(){
+func (n nop) op() {
 }
 
 func (s intStack) Push(v int) intStack {
@@ -53,8 +52,8 @@ func (s stack) Pop() (stack, datatypes.Data) {
 }
 
 func getBoolFromValue(val datatypes.Data) bool {
-	if val.Type >= datatypes.Ptr && val.Type <= datatypes.Int64 {
-		return getInt64(val) != 0
+	if (val.Type >= datatypes.Int8 && val.Type <= datatypes.Int64) || (val.Type >= datatypes.Ptr && val.Type <= datatypes.Uint64) {
+		return getUint64(val) > 0
 	} else if val.Type == datatypes.Bit {
 		return val.Value.(bool)
 	}
@@ -64,8 +63,6 @@ func getBoolFromValue(val datatypes.Data) bool {
 
 func pushIntVar(val int64, d datatypes.DataType, s stack) stack {
 	switch d {
-	case datatypes.Ptr:
-		s = s.Push(datatypes.Data{Value: int32(val), Type: datatypes.Ptr})
 	case datatypes.Int8:
 		s = s.Push(datatypes.Data{Value: int8(val), Type: datatypes.Int8})
 	case datatypes.Int16:
@@ -73,7 +70,24 @@ func pushIntVar(val int64, d datatypes.DataType, s stack) stack {
 	case datatypes.Int32:
 		s = s.Push(datatypes.Data{Value: int32(val), Type: datatypes.Int32})
 	case datatypes.Int64:
-		s = s.Push(datatypes.Data{Value: int64(val), Type: datatypes.Int64})
+		s = s.Push(datatypes.Data{Value: val, Type: datatypes.Int64})
+	}
+
+	return s
+}
+
+func pushUintVar(val uint64, d datatypes.DataType, s stack) stack {
+	switch d {
+	case datatypes.Ptr:
+		s = s.Push(datatypes.Data{Value: uint32(val), Type: datatypes.Ptr})
+	case datatypes.Uint8:
+		s = s.Push(datatypes.Data{Value: uint8(val), Type: datatypes.Uint8})
+	case datatypes.Uint16:
+		s = s.Push(datatypes.Data{Value: uint16(val), Type: datatypes.Uint16})
+	case datatypes.Uint32:
+		s = s.Push(datatypes.Data{Value: uint32(val), Type: datatypes.Uint32})
+	case datatypes.Uint64:
+		s = s.Push(datatypes.Data{Value: val, Type: datatypes.Uint64})
 	}
 
 	return s
@@ -81,8 +95,6 @@ func pushIntVar(val int64, d datatypes.DataType, s stack) stack {
 
 func pushIntVarMem(val int64, d datatypes.DataType, s string, v map[string]datatypes.Data) map[string]datatypes.Data {
 	switch d {
-	case datatypes.Ptr:
-		v[s] = datatypes.Data{Value: int32(val), Type: datatypes.Ptr}
 	case datatypes.Int8:
 		v[s] = datatypes.Data{Value: int8(val), Type: datatypes.Int8}
 	case datatypes.Int16:
@@ -90,7 +102,24 @@ func pushIntVarMem(val int64, d datatypes.DataType, s string, v map[string]datat
 	case datatypes.Int32:
 		v[s] = datatypes.Data{Value: int32(val), Type: datatypes.Int32}
 	case datatypes.Int64:
-		v[s] = datatypes.Data{Value: int64(val), Type: datatypes.Int64}
+		v[s] = datatypes.Data{Value: val, Type: datatypes.Int64}
+	}
+
+	return v
+}
+
+func pushUintVarMem(val uint64, d datatypes.DataType, s string, v map[string]datatypes.Data) map[string]datatypes.Data {
+	switch d {
+	case datatypes.Ptr:
+		v[s] = datatypes.Data{Value: uint32(val), Type: datatypes.Ptr}
+	case datatypes.Uint8:
+		v[s] = datatypes.Data{Value: uint8(val), Type: datatypes.Uint8}
+	case datatypes.Uint16:
+		v[s] = datatypes.Data{Value: uint16(val), Type: datatypes.Uint16}
+	case datatypes.Uint32:
+		v[s] = datatypes.Data{Value: uint32(val), Type: datatypes.Uint32}
+	case datatypes.Uint64:
+		v[s] = datatypes.Data{Value: val, Type: datatypes.Uint64}
 	}
 
 	return v
@@ -124,8 +153,6 @@ Arithmetic operations
 
 func getInt64(data datatypes.Data) int64 {
 	switch data.Type {
-	case datatypes.Ptr:
-		return int64(data.Value.(int32))
 	case datatypes.Int8:
 		return int64(data.Value.(int8))
 	case datatypes.Int16:
@@ -133,7 +160,42 @@ func getInt64(data datatypes.Data) int64 {
 	case datatypes.Int32:
 		return int64(data.Value.(int32))
 	case datatypes.Int64:
-		return int64(data.Value.(int64))
+		return data.Value.(int64)
+	case datatypes.Ptr:
+		return int64(data.Value.(uint32))
+	case datatypes.Uint8:
+		return int64(data.Value.(uint8))
+	case datatypes.Uint16:
+		return int64(data.Value.(uint16))
+	case datatypes.Uint32:
+		return int64(data.Value.(uint32))
+	case datatypes.Uint64:
+		return int64(data.Value.(uint64))
+	default:
+		return 0
+	}
+}
+
+func getUint64(data datatypes.Data) uint64 {
+	switch data.Type {
+	case datatypes.Int8:
+		return uint64(data.Value.(int8))
+	case datatypes.Int16:
+		return uint64(data.Value.(int16))
+	case datatypes.Int32:
+		return uint64(data.Value.(int32))
+	case datatypes.Int64:
+		return uint64(data.Value.(int64))
+	case datatypes.Ptr:
+		return uint64(data.Value.(uint32))
+	case datatypes.Uint8:
+		return uint64(data.Value.(uint8))
+	case datatypes.Uint16:
+		return uint64(data.Value.(uint16))
+	case datatypes.Uint32:
+		return uint64(data.Value.(uint32))
+	case datatypes.Uint64:
+		return data.Value.(uint64)
 	default:
 		return 0
 	}
@@ -146,98 +208,180 @@ func intOp(s stack, op types.Op) stack {
 	s, a2 = s.Pop()
 	s, a1 = s.Pop()
 
-	if !(a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Int64 && a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Int64) {
-		panic("Variable is not of type int or ptr!")
-	}
+	if (a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Uint64) && (a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Uint64) {
+		min := a1.Type
 
-	min := a1.Type
-
-	if a2.Type > min {
-		min = a2.Type
-	}
-
-	if min == datatypes.Ptr {
-		min = datatypes.Int32
-	}
-
-	isPtr := false
-	if a1.Type == datatypes.Ptr || a2.Type == datatypes.Ptr {
-		isPtr = true
-	}
-
-	left := getInt64(a1)
-	right := getInt64(a2)
-
-	var result int64
-
-	switch op {
-	case types.Add:
-		result = left + right
-	case types.Sub:
-		result = left - right
-	case types.Mul:
-		result = left * right
-	case types.Div:
-		result = left / right
-	case types.Mod:
-		result = left % right
-	case types.Shr, types.Shl:
-		leftu := uint64(left)
-		rightu := uint64(right)
-
-		if op == types.Shl {
-			result = int64(leftu << rightu)
-		} else {
-			result = int64(leftu >> rightu)
+		if a2.Type > min {
+			min = a2.Type
 		}
-	case types.And:
-		result = left & right
-	case types.Or:
-		result = left | right
-	case types.Xor:
-		result = left ^ right
-	case types.Le:
-		s = s.Push(datatypes.Data{Value: left <= right, Type: datatypes.Bit})
-		return s
-	case types.Ge:
-		s = s.Push(datatypes.Data{Value: left >= right, Type: datatypes.Bit})
-		return s
-	case types.L:
-		s = s.Push(datatypes.Data{Value: left < right, Type: datatypes.Bit})
-		return s
-	case types.G:
-		s = s.Push(datatypes.Data{Value: left > right, Type: datatypes.Bit})
-		return s
-	}
 
-	if isPtr {
-		s = s.Push(datatypes.Data{Value: int32(result), Type: datatypes.Ptr})
-		return s
-	}
+		left := getUint64(a1)
+		right := getUint64(a2)
 
-	return pushIntVar(result, min, s)
+		var result uint64
+
+		switch op {
+		case types.Add:
+			result = left + right
+		case types.Sub:
+			result = left - right
+		case types.Mul:
+			result = left * right
+		case types.Div:
+			result = left / right
+		case types.Mod:
+			result = left % right
+		case types.Shr, types.Shl:
+			if op == types.Shl {
+				result = left << right
+			} else {
+				result = left >> right
+			}
+		case types.And:
+			result = left & right
+		case types.Or:
+			result = left | right
+		case types.Xor:
+			result = left ^ right
+		case types.Le:
+			s = s.Push(datatypes.Data{Value: left <= right, Type: datatypes.Bit})
+			return s
+		case types.Ge:
+			s = s.Push(datatypes.Data{Value: left >= right, Type: datatypes.Bit})
+			return s
+		case types.L:
+			s = s.Push(datatypes.Data{Value: left < right, Type: datatypes.Bit})
+			return s
+		case types.G:
+			s = s.Push(datatypes.Data{Value: left > right, Type: datatypes.Bit})
+			return s
+		}
+
+		return pushUintVar(result, min, s)
+	} else {
+		if !(((a1.Type >= datatypes.Int8 && a1.Type <= datatypes.Int64) || (a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Uint64)) && ((a2.Type >= datatypes.Int8 && a2.Type <= datatypes.Int64) || (a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Uint64))) {
+			panic("One of the values is not of type int or ptr!")
+		}
+
+		a1Type := a1.Type
+		a2Type := a2.Type
+
+		//Convert uint types to int types for a1
+		switch a1Type {
+		case datatypes.Uint8:
+			a1.Type = datatypes.Int8
+		case datatypes.Uint16:
+			a1.Type = datatypes.Int16
+		case datatypes.Uint32, datatypes.Ptr:
+			a1.Type = datatypes.Int32
+		case datatypes.Uint64:
+			a1.Type = datatypes.Int64
+		}
+
+		//Convert uint types to int types for a2
+		switch a2Type {
+		case datatypes.Uint8:
+			a2.Type = datatypes.Int8
+		case datatypes.Uint16:
+			a2.Type = datatypes.Int16
+		case datatypes.Uint32, datatypes.Ptr:
+			a2.Type = datatypes.Int32
+		case datatypes.Uint64:
+			a2.Type = datatypes.Int64
+		}
+
+		min := a1.Type
+
+		if a2.Type > min {
+			min = a2.Type
+		}
+
+		a1.Type = a1Type
+		a2.Type = a2Type
+		left := getInt64(a1)
+		right := getInt64(a2)
+
+		var result int64
+
+		switch op {
+		case types.Add:
+			result = left + right
+		case types.Sub:
+			result = left - right
+		case types.Mul:
+			result = left * right
+		case types.Div:
+			result = left / right
+		case types.Mod:
+			result = left % right
+		case types.Shr, types.Shl:
+			leftu := uint64(left)
+			rightu := uint64(right)
+
+			if op == types.Shl {
+				result = int64(leftu << rightu)
+			} else {
+				result = int64(leftu >> rightu)
+			}
+		case types.And:
+			result = left & right
+		case types.Or:
+			result = left | right
+		case types.Xor:
+			result = left ^ right
+		case types.Le:
+			s = s.Push(datatypes.Data{Value: left <= right, Type: datatypes.Bit})
+			return s
+		case types.Ge:
+			s = s.Push(datatypes.Data{Value: left >= right, Type: datatypes.Bit})
+			return s
+		case types.L:
+			s = s.Push(datatypes.Data{Value: left < right, Type: datatypes.Bit})
+			return s
+		case types.G:
+			s = s.Push(datatypes.Data{Value: left > right, Type: datatypes.Bit})
+			return s
+		}
+
+		return pushIntVar(result, min, s)
+	}
 }
 
 func intSingleOp(s stack, op types.Op) stack {
 	var opv datatypes.Data
 	s, opv = s.Pop()
 
-	if !(opv.Type >= datatypes.Ptr && opv.Type <= datatypes.Int64) {
-		panic("Value is not of type int or bit!")
+	if opv.Type >= datatypes.Ptr && opv.Type <= datatypes.Uint64 {
+		opInt := getUint64(opv)
+
+		switch op {
+		case types.Not:
+			opInt = ^opInt
+		case types.Inc:
+			opInt++
+		case types.Dec:
+			opInt--
+		}
+
+		return pushUintVar(opInt, opv.Type, s)
+	} else {
+		if !(opv.Type >= datatypes.Int8 && opv.Type <= datatypes.Int64) {
+			panic("Value is not of type int or bit!")
+		}
+
+		opInt := getInt64(opv)
+
+		switch op {
+		case types.Not:
+			opInt = ^opInt
+		case types.Inc:
+			opInt++
+		case types.Dec:
+			opInt--
+		}
+
+		return pushIntVar(opInt, opv.Type, s)
 	}
-
-	opInt := getInt64(opv)
-
-	switch op {
-	case types.Not:
-		opInt = ^opInt
-	case types.Inc:
-		opInt++
-	case types.Dec:
-		opInt--
-	}
-
-	return pushIntVar(opInt, opv.Type, s)
 }
 
 func getFloat64(data datatypes.Data) float64 {
@@ -354,7 +498,25 @@ func declareIntConst(command types.Command, c []datatypes.Data, d datatypes.Data
 	case datatypes.Int32:
 		c = append(c, datatypes.Data{Value: int32(num), Type: datatypes.Int32})
 	case datatypes.Int64:
-		c = append(c, datatypes.Data{Value: int64(num), Type: datatypes.Int64})
+		c = append(c, datatypes.Data{Value: num, Type: datatypes.Int64})
+	}
+
+	return c
+}
+
+func declareUintConst(command types.Command, c []datatypes.Data, d datatypes.DataType) []datatypes.Data {
+	var num uint64
+	num, _ = strconv.ParseUint(command.Param.Text, 0, 64)
+
+	switch d {
+	case datatypes.Uint8:
+		c = append(c, datatypes.Data{Value: uint8(num), Type: datatypes.Uint8})
+	case datatypes.Uint16:
+		c = append(c, datatypes.Data{Value: uint16(num), Type: datatypes.Uint16})
+	case datatypes.Uint32:
+		c = append(c, datatypes.Data{Value: uint32(num), Type: datatypes.Uint32})
+	case datatypes.Uint64:
+		c = append(c, datatypes.Data{Value: num, Type: datatypes.Uint64})
 	}
 
 	return c
@@ -418,7 +580,7 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 	case datatypes.Bit:
 		v[command.Param.Text] = datatypes.Data{Value: false, Type: datatypes.Bit}
 	case datatypes.Ptr:
-		v[command.Param.Text] = datatypes.Data{Value: int32(0x0), Type: datatypes.Ptr}
+		v[command.Param.Text] = datatypes.Data{Value: uint32(0x0), Type: datatypes.Ptr}
 	case datatypes.Int8:
 		v[command.Param.Text] = datatypes.Data{Value: int8(0), Type: datatypes.Int8}
 	case datatypes.Int16:
@@ -427,6 +589,14 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 		v[command.Param.Text] = datatypes.Data{Value: int32(0), Type: datatypes.Int32}
 	case datatypes.Int64:
 		v[command.Param.Text] = datatypes.Data{Value: int64(0), Type: datatypes.Int64}
+	case datatypes.Uint8:
+		v[command.Param.Text] = datatypes.Data{Value: uint8(0), Type: datatypes.Uint8}
+	case datatypes.Uint16:
+		v[command.Param.Text] = datatypes.Data{Value: uint16(0), Type: datatypes.Uint16}
+	case datatypes.Uint32:
+		v[command.Param.Text] = datatypes.Data{Value: uint32(0), Type: datatypes.Uint32}
+	case datatypes.Uint64:
+		v[command.Param.Text] = datatypes.Data{Value: uint64(0), Type: datatypes.Uint64}
 	case datatypes.Float32:
 		v[command.Param.Text] = datatypes.Data{Value: float32(0), Type: datatypes.Float32}
 	case datatypes.Float64:
@@ -448,19 +618,19 @@ func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes
 	name := getByPtr(command, v)
 	t := v[name].Type
 
-	//Load int8 as string
-	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t == datatypes.Int8 {
+	//Load uint8 as string
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t == datatypes.Uint8 {
 		s = s.Push(datatypes.Data{
-			Value: string(v[name].Value.(int8)),
+			Value: string(v[name].Value.(uint8)),
 			Type:  d,
 		})
 		return s
 	}
 
-	//Load string as int8
-	if d == datatypes.Int8 && t >= datatypes.StringASCII && t <= datatypes.StringUnicode && len(v[name].Value.(string)) == 1 {
+	//Load string as uint8
+	if d == datatypes.Uint8 && t >= datatypes.StringASCII && t <= datatypes.StringUnicode && len(v[name].Value.(string)) == 1 {
 		s = s.Push(datatypes.Data{
-			Value: int8(v[name].Value.(string)[0]),
+			Value: uint8(v[name].Value.(string)[0]),
 			Type:  t,
 		})
 		return s
@@ -475,8 +645,12 @@ func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes
 		return pushFloatVar(getFloat64(v[name]), d, s)
 	}
 
-	if d >= datatypes.Ptr && d <= datatypes.Int64 && t >= datatypes.Ptr && t <= datatypes.Int64 {
+	if d >= datatypes.Int8 && d <= datatypes.Int64 && ((t >= datatypes.Int8 && t <= datatypes.Int64) || (t >= datatypes.Ptr && t <= datatypes.Uint64)) {
 		return pushIntVar(getInt64(v[name]), d, s)
+	}
+
+	if d >= datatypes.Ptr && d <= datatypes.Uint64 && ((t >= datatypes.Int8 && t <= datatypes.Int64) || (t >= datatypes.Ptr && t <= datatypes.Uint64)) {
+		return pushUintVar(getUint64(v[name]), d, s)
 	}
 
 	if d == datatypes.Bit && t == datatypes.Bit {
@@ -499,19 +673,19 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 
 	index += cbase[min]
 
-	//Load string as int8
-	if c[index].Type >= datatypes.StringASCII && c[index].Type <= datatypes.StringUnicode && d == datatypes.Int8 && len(c[index].Value.(string)) == 1 {
+	//Load string as uint8
+	if c[index].Type >= datatypes.StringASCII && c[index].Type <= datatypes.StringUnicode && d == datatypes.Uint8 && len(c[index].Value.(string)) == 1 {
 		s = s.Push(datatypes.Data{
-			Value: int8(c[index].Value.(string)[0]),
+			Value: uint8(c[index].Value.(string)[0]),
 			Type:  d,
 		})
 		return s
 	}
 
-	//Load int8 as string
-	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && c[index].Type == datatypes.Int8 {
+	//Load uint8 as string
+	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && c[index].Type == datatypes.Uint8 {
 		s = s.Push(datatypes.Data{
-			Value: string(c[index].Value.(int8)),
+			Value: string(c[index].Value.(uint8)),
 			Type:  d,
 		})
 		return s
@@ -526,8 +700,12 @@ func loadConst(command types.Command, d datatypes.DataType, c []datatypes.Data, 
 		return pushFloatVar(getFloat64(c[index]), d, s)
 	}
 
-	if d >= datatypes.Ptr && d <= datatypes.Int64 && c[index].Type >= datatypes.Ptr && c[index].Type <= datatypes.Int64 {
+	if d >= datatypes.Int8 && d <= datatypes.Int64 && ((c[index].Type >= datatypes.Int8 && c[index].Type <= datatypes.Int64) || (c[index].Type >= datatypes.Uint8 && c[index].Type <= datatypes.Uint64)) {
 		return pushIntVar(getInt64(c[index]), d, s)
+	}
+
+	if d >= datatypes.Uint8 && d <= datatypes.Uint64 && ((c[index].Type >= datatypes.Int8 && c[index].Type <= datatypes.Int64) || (c[index].Type >= datatypes.Uint8 && c[index].Type <= datatypes.Uint64)) {
+		return pushUintVar(getUint64(c[index]), d, s)
 	}
 
 	if d == datatypes.Bit && c[index].Type == datatypes.Bit {
@@ -543,13 +721,13 @@ Syscall
 */
 
 func syscall(command types.Command, s stack, vars map[string]datatypes.Data) stack {
-	var num int64
+	var num uint64
 
 	switch command.Param.Kind {
 	case types.HexNumber:
-		num, _ = strconv.ParseInt(command.Param.Text, 0, 8)
+		num, _ = strconv.ParseUint(command.Param.Text, 0, 8)
 	case types.Number:
-		num, _ = strconv.ParseInt(command.Param.Text, 10, 8)
+		num, _ = strconv.ParseUint(command.Param.Text, 10, 8)
 	case types.Pointer:
 		val := vars[strings.Trim(strings.Trim(command.Param.Text, "]"), "[")]
 
@@ -557,7 +735,7 @@ func syscall(command types.Command, s stack, vars map[string]datatypes.Data) sta
 			panic("Variable is not of type ptr!")
 		}
 
-		num = int64(val.Value.(int32))
+		num = uint64(val.Value.(uint32))
 	}
 
 	switch types.Op(num) {
@@ -596,10 +774,10 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 	var t datatypes.Data
 	s, t = s.Pop()
 
-	//Store string as int8
-	if d == datatypes.Int8 && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode && len(t.Value.(string)) == 1 {
+	//Store string as uint8
+	if d == datatypes.Uint8 && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode && len(t.Value.(string)) == 1 {
 		v[name] = datatypes.Data{
-			Value: int8(t.Value.(string)[0]),
+			Value: uint8(t.Value.(string)[0]),
 			Type:  d,
 		}
 		return s, v
@@ -610,10 +788,10 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 		return s, v
 	}
 
-	//Store int8 as string
+	//Store uint8 as string
 	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode {
-		if t.Type == datatypes.Int8 {
-			v[name] = datatypes.Data{Value: string(t.Value.(int8)), Type: d}
+		if t.Type == datatypes.Uint8 {
+			v[name] = datatypes.Data{Value: string(t.Value.(uint8)), Type: d}
 			return s, v
 		}
 	}
@@ -622,8 +800,12 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 		return s, pushFloatVarMem(getFloat64(t), d, name, v)
 	}
 
-	if d >= datatypes.Ptr && d <= datatypes.Int64 && t.Type >= datatypes.Ptr && t.Type <= datatypes.Int64 {
+	if d >= datatypes.Int8 && d <= datatypes.Int64 && ((t.Type >= datatypes.Int8 && t.Type <= datatypes.Int64) || (t.Type >= datatypes.Ptr && t.Type <= datatypes.Uint64)) {
 		return s, pushIntVarMem(getInt64(t), d, name, v)
+	}
+
+	if d >= datatypes.Ptr && d <= datatypes.Uint64 && ((t.Type >= datatypes.Int8 && t.Type <= datatypes.Int64) || (t.Type >= datatypes.Ptr && t.Type <= datatypes.Uint64)) {
+		return s, pushUintVarMem(getUint64(t), d, name, v)
 	}
 
 	if d == datatypes.Bit && t.Type == datatypes.Bit {
@@ -655,7 +837,7 @@ func getByPtr(command types.Command, v map[string]datatypes.Data) string {
 			panic("Variable is not of type ptr!")
 		}
 
-		return addresses[ptr.Value.(int32)]
+		return addresses[ptr.Value.(uint32)]
 
 	case types.Name:
 		return command.Param.Text
@@ -825,7 +1007,7 @@ func Run(root types.Root) int8 {
 				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
 					var val datatypes.Data
 					s, val = s.Pop()
-					s = s.Push(datatypes.Data{Value: int8(a1.Value.(string)[getInt64(val)]), Type: datatypes.Int8})
+					s = s.Push(datatypes.Data{Value: uint8(a1.Value.(string)[getUint64(val)]), Type: datatypes.Uint8})
 				} else {
 					panic("Value is not of type stringa or stringu!")
 				}
@@ -839,12 +1021,12 @@ func Run(root types.Root) int8 {
 					var pos datatypes.Data
 					s, pos = s.Pop()
 
-					if char.Type != datatypes.Int8 {
+					if char.Type != datatypes.Uint8 {
 						panic("Value is not of type int8!")
 					}
 
 					tempVal := a1.Value.(string)
-					tempVal = replaceAtIndex(tempVal, rune(char.Value.(int8)), int(getInt64(pos)))
+					tempVal = replaceAtIndex(tempVal, rune(char.Value.(uint8)), getUint64(pos))
 					a1.Value = tempVal
 
 					s = s.Push(datatypes.Data{Value: tempVal, Type: datatypes.StringUnicode})
@@ -899,6 +1081,15 @@ func Run(root types.Root) int8 {
 			case "dci64":
 				constants = declareIntConst(root.Commands[e], constants, datatypes.Int64)
 
+			case "dcu8":
+				constants = declareUintConst(root.Commands[e], constants, datatypes.Uint8)
+			case "dcu16":
+				constants = declareUintConst(root.Commands[e], constants, datatypes.Uint16)
+			case "dcu32", "dcu":
+				constants = declareUintConst(root.Commands[e], constants, datatypes.Uint32)
+			case "dcu64":
+				constants = declareUintConst(root.Commands[e], constants, datatypes.Uint64)
+
 			/*
 				Declare float constant
 			*/
@@ -931,6 +1122,14 @@ func Run(root types.Root) int8 {
 				v = declareVar(root.Commands[e], datatypes.Int32, v)
 			case "v_int64":
 				v = declareVar(root.Commands[e], datatypes.Int64, v)
+			case "v_uint8":
+				v = declareVar(root.Commands[e], datatypes.Uint8, v)
+			case "v_uint16":
+				v = declareVar(root.Commands[e], datatypes.Uint16, v)
+			case "v_uint32", "v_uint":
+				v = declareVar(root.Commands[e], datatypes.Uint32, v)
+			case "v_uint64":
+				v = declareVar(root.Commands[e], datatypes.Uint64, v)
 			case "v_float32", "v_float":
 				v = declareVar(root.Commands[e], datatypes.Float32, v)
 			case "v_float64", "v_double":
@@ -955,6 +1154,14 @@ func Run(root types.Root) int8 {
 				s = loadVar(root.Commands[e], datatypes.Int32, v, s)
 			case "ldi64v":
 				s = loadVar(root.Commands[e], datatypes.Int64, v, s)
+			case "ldu8v":
+				s = loadVar(root.Commands[e], datatypes.Uint8, v, s)
+			case "ldu16v":
+				s = loadVar(root.Commands[e], datatypes.Uint16, v, s)
+			case "ldu32v", "lduv":
+				s = loadVar(root.Commands[e], datatypes.Uint32, v, s)
+			case "ldu64v":
+				s = loadVar(root.Commands[e], datatypes.Uint64, v, s)
 			case "ldf32v", "ldfv":
 				s = loadVar(root.Commands[e], datatypes.Float32, v, s)
 			case "ldf64v", "lddv":
@@ -979,6 +1186,14 @@ func Run(root types.Root) int8 {
 				s = loadConst(root.Commands[e], datatypes.Int32, constants, s, e)
 			case "ldi64c":
 				s = loadConst(root.Commands[e], datatypes.Int64, constants, s, e)
+			case "ldu8c":
+				s = loadConst(root.Commands[e], datatypes.Uint8, constants, s, e)
+			case "ldu16c":
+				s = loadConst(root.Commands[e], datatypes.Uint16, constants, s, e)
+			case "ldu32c", "lduc":
+				s = loadConst(root.Commands[e], datatypes.Uint32, constants, s, e)
+			case "ldu64c":
+				s = loadConst(root.Commands[e], datatypes.Uint64, constants, s, e)
 			case "ldf32c", "ldfc":
 				s = loadConst(root.Commands[e], datatypes.Float32, constants, s, e)
 			case "ldf64c", "lddc":
@@ -991,7 +1206,7 @@ func Run(root types.Root) int8 {
 				s = loadConst(root.Commands[e], datatypes.Bit, constants, s, e)
 
 			case "ldptr":
-				s = s.Push(datatypes.Data{Value: int32(revAddresses[root.Commands[e].Param.Text]), Type: datatypes.Ptr})
+				s = s.Push(datatypes.Data{Value: uint32(revAddresses[root.Commands[e].Param.Text]), Type: datatypes.Ptr})
 			}
 		}
 	}

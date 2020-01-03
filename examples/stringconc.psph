@@ -1,7 +1,7 @@
 dcsa "Bar"
-dci32 42
+dcu8 42
 
-ldi32c 1
+ldu8c 1
 ldsac 0
 conc
 

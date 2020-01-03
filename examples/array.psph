@@ -10,6 +10,10 @@ v_ptr arr_ptr
 ldptr var0
 store arr_ptr # arr_ptr is 0x0
 
+dci32 400
+ldi32c 1
+store var2
+
 ldptrv arr_ptr
 ldi32c 0
 add
