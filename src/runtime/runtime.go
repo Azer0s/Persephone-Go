@@ -364,24 +364,24 @@ func intSingleOp(s stack, op types.Op) stack {
 		}
 
 		return pushUintVar(opInt, opv.Type, s)
-	} else {
-		if !(opv.Type >= datatypes.Int8 && opv.Type <= datatypes.Int64) {
-			panic("Value is not of type int or bit!")
-		}
-
-		opInt := getInt64(opv)
-
-		switch op {
-		case types.Not:
-			opInt = ^opInt
-		case types.Inc:
-			opInt++
-		case types.Dec:
-			opInt--
-		}
-
-		return pushIntVar(opInt, opv.Type, s)
 	}
+
+	if !(opv.Type >= datatypes.Int8 && opv.Type <= datatypes.Int64) {
+		panic("Value is not of type int or bit!")
+	}
+
+	opInt := getInt64(opv)
+
+	switch op {
+	case types.Not:
+		opInt = ^opInt
+	case types.Inc:
+		opInt++
+	case types.Dec:
+		opInt--
+	}
+
+	return pushIntVar(opInt, opv.Type, s)
 }
 
 func getFloat64(data datatypes.Data) float64 {
