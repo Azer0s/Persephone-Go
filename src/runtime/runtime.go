@@ -28,6 +28,12 @@ var revAddresses map[string]int
 var cbase map[int]int
 var constants []datatypes.Data
 
+type nop struct {
+}
+
+func (n nop) op(){
+}
+
 func (s intStack) Push(v int) intStack {
 	return append(s, v)
 }
@@ -49,7 +55,7 @@ func (s stack) Pop() (stack, datatypes.Data) {
 func getBoolFromValue(val datatypes.Data) bool {
 	if val.Type >= datatypes.Ptr && val.Type <= datatypes.Int64 {
 		return getInt64(val) != 0
-	} else {
+	} else if val.Type == datatypes.Bit {
 		return val.Value.(bool)
 	}
 
@@ -681,6 +687,10 @@ func Run(root types.Root) int8 {
 			switch root.Commands[e].Command.Text {
 			case "pop":
 				s, _ = s.Pop()
+
+			case "nop":
+				n := &nop{}
+				n.op()
 
 			/*
 				Arithmetic int operations

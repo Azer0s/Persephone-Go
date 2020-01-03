@@ -1,0 +1,13 @@
+v_int8 a
+dci8 10
+
+nop
+nop
+nop
+nop
+
+ldi8c 0
+store a
+
+ldi8v a
+syscall 0x10
