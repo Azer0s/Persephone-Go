@@ -258,93 +258,93 @@ func intOp(s stack, op types.Op) stack {
 		}
 
 		return pushUintVar(result, min, s)
-	} else {
-		if !(((a1.Type >= datatypes.Int8 && a1.Type <= datatypes.Int64) || (a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Uint64)) && ((a2.Type >= datatypes.Int8 && a2.Type <= datatypes.Int64) || (a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Uint64))) {
-			panic("One of the values is not of type int or ptr!")
-		}
-
-		a1Type := a1.Type
-		a2Type := a2.Type
-
-		//Convert uint types to int types for a1
-		switch a1Type {
-		case datatypes.Uint8:
-			a1.Type = datatypes.Int8
-		case datatypes.Uint16:
-			a1.Type = datatypes.Int16
-		case datatypes.Uint32, datatypes.Ptr:
-			a1.Type = datatypes.Int32
-		case datatypes.Uint64:
-			a1.Type = datatypes.Int64
-		}
-
-		//Convert uint types to int types for a2
-		switch a2Type {
-		case datatypes.Uint8:
-			a2.Type = datatypes.Int8
-		case datatypes.Uint16:
-			a2.Type = datatypes.Int16
-		case datatypes.Uint32, datatypes.Ptr:
-			a2.Type = datatypes.Int32
-		case datatypes.Uint64:
-			a2.Type = datatypes.Int64
-		}
-
-		min := a1.Type
-
-		if a2.Type > min {
-			min = a2.Type
-		}
-
-		a1.Type = a1Type
-		a2.Type = a2Type
-		left := getInt64(a1)
-		right := getInt64(a2)
-
-		var result int64
-
-		switch op {
-		case types.Add:
-			result = left + right
-		case types.Sub:
-			result = left - right
-		case types.Mul:
-			result = left * right
-		case types.Div:
-			result = left / right
-		case types.Mod:
-			result = left % right
-		case types.Shr, types.Shl:
-			leftu := uint64(left)
-			rightu := uint64(right)
-
-			if op == types.Shl {
-				result = int64(leftu << rightu)
-			} else {
-				result = int64(leftu >> rightu)
-			}
-		case types.And:
-			result = left & right
-		case types.Or:
-			result = left | right
-		case types.Xor:
-			result = left ^ right
-		case types.Le:
-			s = s.Push(datatypes.Data{Value: left <= right, Type: datatypes.Bit})
-			return s
-		case types.Ge:
-			s = s.Push(datatypes.Data{Value: left >= right, Type: datatypes.Bit})
-			return s
-		case types.L:
-			s = s.Push(datatypes.Data{Value: left < right, Type: datatypes.Bit})
-			return s
-		case types.G:
-			s = s.Push(datatypes.Data{Value: left > right, Type: datatypes.Bit})
-			return s
-		}
-
-		return pushIntVar(result, min, s)
 	}
+
+	if !(((a1.Type >= datatypes.Int8 && a1.Type <= datatypes.Int64) || (a1.Type >= datatypes.Ptr && a1.Type <= datatypes.Uint64)) && ((a2.Type >= datatypes.Int8 && a2.Type <= datatypes.Int64) || (a2.Type >= datatypes.Ptr && a2.Type <= datatypes.Uint64))) {
+		panic("One of the values is not of type int or ptr!")
+	}
+
+	a1Type := a1.Type
+	a2Type := a2.Type
+
+	//Convert uint types to int types for a1
+	switch a1Type {
+	case datatypes.Uint8:
+		a1.Type = datatypes.Int8
+	case datatypes.Uint16:
+		a1.Type = datatypes.Int16
+	case datatypes.Uint32, datatypes.Ptr:
+		a1.Type = datatypes.Int32
+	case datatypes.Uint64:
+		a1.Type = datatypes.Int64
+	}
+
+	//Convert uint types to int types for a2
+	switch a2Type {
+	case datatypes.Uint8:
+		a2.Type = datatypes.Int8
+	case datatypes.Uint16:
+		a2.Type = datatypes.Int16
+	case datatypes.Uint32, datatypes.Ptr:
+		a2.Type = datatypes.Int32
+	case datatypes.Uint64:
+		a2.Type = datatypes.Int64
+	}
+
+	min := a1.Type
+
+	if a2.Type > min {
+		min = a2.Type
+	}
+
+	a1.Type = a1Type
+	a2.Type = a2Type
+	left := getInt64(a1)
+	right := getInt64(a2)
+
+	var result int64
+
+	switch op {
+	case types.Add:
+		result = left + right
+	case types.Sub:
+		result = left - right
+	case types.Mul:
+		result = left * right
+	case types.Div:
+		result = left / right
+	case types.Mod:
+		result = left % right
+	case types.Shr, types.Shl:
+		leftu := uint64(left)
+		rightu := uint64(right)
+
+		if op == types.Shl {
+			result = int64(leftu << rightu)
+		} else {
+			result = int64(leftu >> rightu)
+		}
+	case types.And:
+		result = left & right
+	case types.Or:
+		result = left | right
+	case types.Xor:
+		result = left ^ right
+	case types.Le:
+		s = s.Push(datatypes.Data{Value: left <= right, Type: datatypes.Bit})
+		return s
+	case types.Ge:
+		s = s.Push(datatypes.Data{Value: left >= right, Type: datatypes.Bit})
+		return s
+	case types.L:
+		s = s.Push(datatypes.Data{Value: left < right, Type: datatypes.Bit})
+		return s
+	case types.G:
+		s = s.Push(datatypes.Data{Value: left > right, Type: datatypes.Bit})
+		return s
+	}
+
+	return pushIntVar(result, min, s)
 }
 
 func intSingleOp(s stack, op types.Op) stack {
