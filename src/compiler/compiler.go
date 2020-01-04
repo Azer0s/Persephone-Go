@@ -11,8 +11,10 @@ import (
 )
 
 var opcodes = map[string]uint16{
+	"type":      uint16(0xEEEE),
 	"nop":       uint16(0x1000),
 	"store":     uint16(0x0000),
+	"v_dyn":     uint16(0x0101),
 	"v_int8":    uint16(0x0108),
 	"v_int16":   uint16(0x0110),
 	"v_int32":   uint16(0x0120),
@@ -49,6 +51,7 @@ var opcodes = map[string]uint16{
 	"dcsa":      uint16(0x0231),
 	"dcsu":      uint16(0x0232),
 	"dcb":       uint16(0x0200),
+	"lddynv":    uint16(0x0301),
 	"ldi8v":     uint16(0x0318),
 	"ldi16v":    uint16(0x0310),
 	"ldi32v":    uint16(0x0320),

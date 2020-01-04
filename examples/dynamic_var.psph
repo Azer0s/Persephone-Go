@@ -1,0 +1,48 @@
+v_dyn a
+dci16 200
+dcsa "Hello"
+dcu64 1844674407370955161
+
+ldi16c 0
+store a
+type a
+
+# Should be 0x1
+syscall 0x10
+
+ldsac 1
+store a
+type a
+
+# Should be 0x3
+syscall 0x10
+
+ldu64c 2
+store a
+type a
+
+# Should be 0x0
+syscall 0x10
+
+lddynv a
+syscall 0x10
+
+ldu16c 0
+store a
+
+cbase
+
+dcu16 14
+dcu16 214
+
+ldu16c 0
+lddynv a
+add
+store a
+
+ldu16c 1
+lddynv a
+eq
+
+# should be true
+syscall 0x10
