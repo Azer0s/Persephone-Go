@@ -1,0 +1,68 @@
+v_uint8 a
+v_stringa b
+
+dcsa "Variables are equal!"
+dcsa "Variables are not equal!"
+
+# a = 65
+dcu8 65
+ldu8c 2
+store a
+
+# b = "A"
+dcsa "A"
+ldsac 3
+store b
+
+# a == b
+ldu8v a
+ldu8v b
+eq
+
+jmpt e_print1
+jmp skp_e_print1
+
+e_print1:
+call e_print
+jmp skp_ne_print1
+
+skp_e_print1:
+call ne_print
+skp_ne_print1:
+
+# b = "B"
+dcsa "B"
+ldsac 4
+store b
+
+# a == b
+ldu8v a
+ldu8v b
+eq
+
+jmpt e_print2
+jmp skp_e_print2
+
+e_print2:
+call e_print
+jmp skp_ne_print2
+
+skp_e_print2:
+call ne_print
+skp_ne_print2:
+
+#
+# Functions
+#
+
+jmp exit
+e_print:
+    ldsac 0
+    syscall 0x10
+    ret
+
+ne_print:
+    ldsac 1
+    syscall 0x10
+    ret
+exit:
