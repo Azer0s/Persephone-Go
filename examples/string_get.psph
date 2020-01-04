@@ -3,7 +3,7 @@ dcsa "Foo"
 ldsac 0
 store h
 
-dci8 1
-ldi8c 1
+dcu8 1
+ldu8c 1
 getc h
 syscall 0x10

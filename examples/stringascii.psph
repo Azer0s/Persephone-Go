@@ -1,7 +1,7 @@
-dci8 65
+dcu8 65
 v_stringa char
 
-ldi8c 0
+ldu8c 0
 store char
 
 ldsav char

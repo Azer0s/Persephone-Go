@@ -140,6 +140,33 @@ func Run(bytes []byte) int8 {
 					param.Value = int64(getUint64FromBytes(code[e], code[e+1], code[e+2], code[e+3], code[e+4], code[e+5], code[e+6], code[e+7]))
 					e += 8
 				}
+
+			case compiler.Uint:
+				intSize := code[e]
+				e++
+
+				switch intSize {
+				case compiler.Int8:
+					param.Type = datatypes.Uint8
+					param.Value = code[e]
+					e++
+
+				case compiler.Int16:
+					param.Type = datatypes.Uint16
+					param.Value = getUint16FromBytes(code[e], code[e+1])
+					e += 2
+
+				case compiler.Int32:
+					param.Type = datatypes.Uint32
+					param.Value = getUint32FromBytes(code[e], code[e+1], code[e+2], code[e+3])
+					e += 4
+
+				case compiler.Int64:
+					param.Type = datatypes.Uint64
+					param.Value = getUint64FromBytes(code[e], code[e+1], code[e+2], code[e+3], code[e+4], code[e+5], code[e+6], code[e+7])
+					e += 8
+				}
+
 			case compiler.Float:
 				floatSize := code[e]
 				e++

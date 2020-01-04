@@ -3,5 +3,5 @@ v_stringa a
 ldsac 0
 store a
 
-ldi8v a
+ldu8v a
 syscall 0x10

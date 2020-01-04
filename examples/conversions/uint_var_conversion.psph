@@ -1,0 +1,23 @@
+v_uint16 a
+dci8 -20
+cbase
+dcu8 255
+ldu8c 0
+store a
+ldi8v a
+
+pop
+
+cbase
+dcu8 240
+dci8 120
+ldu8c 0
+ldi8c 1
+sub
+
+pop
+
+dcu8 255
+ldu8c 0
+ldu8c 2
+sub

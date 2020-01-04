@@ -3,15 +3,15 @@ dcsa "Foo⌘"
 ldsac 0
 store h
 
-dci8 0
-ldi8c 1
+dcu8 0
+ldu8c 1
 
 v_ptr h_ptr
 ldptr h
 store h_ptr
 
-dci8 65
-ldi8c 2
+dcu8 65
+ldu8c 2
 
 setc [h_ptr]
 syscall 0x10

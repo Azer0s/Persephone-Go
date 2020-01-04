@@ -1,7 +1,7 @@
 v_stringa a
-dci8 65
+dcu8 65
 
-ldi8c 0
+ldu8c 0
 store a
 
 ldsav a
