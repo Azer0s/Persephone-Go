@@ -31,8 +31,10 @@ $ ./bin/persephone -i /path/to/file
 $ ./bin/persephone -i /path/to/file -c /path/to/output/file
 ```
 
+<!---
 ### Run a compiled file
 
 ```bash
 $ ./bin/persephone -i /path/to/file -b
 ```
+-->
