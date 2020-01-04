@@ -87,6 +87,7 @@ var opcodes = map[string]uint16{
 	"cbase":     uint16(0xFFFF),
 	"pop":       uint16(0x0001),
 	"ret":       uint16(0x0002),
+	"eg":        uint16(0x0030),
 	"add":       uint16(0x0003),
 	"sub":       uint16(0x0004),
 	"mul":       uint16(0x0005),

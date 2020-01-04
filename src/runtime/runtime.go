@@ -941,6 +941,15 @@ func Run(root types.Root) int8 {
 			case "not":
 				s = bitOp(s, types.Not)
 
+			case "eq":
+				var a,b datatypes.Data
+				s, a = s.Pop()
+				s, b = s.Pop()
+				s = s.Push(datatypes.Data{
+					Value: a.Value == b.Value,
+					Type:  datatypes.Bit,
+				})
+
 			/*
 				Cbase
 			*/

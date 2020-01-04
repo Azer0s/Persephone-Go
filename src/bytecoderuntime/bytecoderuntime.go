@@ -100,6 +100,7 @@ func Run(bytes []byte) int8 {
 			uint16(0x001E),
 			uint16(0x001F),
 			uint16(0x0002),
+			uint16(0x0030),
 			uint16(0x0020):
 			statements = append(statements, command{opcode, datatypes.Data{}})
 			continue
