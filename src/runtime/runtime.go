@@ -1003,12 +1003,25 @@ func Run(root types.Root) int8 {
 				String functions
 			*/
 			case "len":
-				a1 := v[getByPtr(root.Commands[e], v)]
+				a := v[getByPtr(root.Commands[e], v)]
 
-				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
-					s = s.Push(datatypes.Data{Value: len(a1.Value.(string)), Type: datatypes.Int32})
+				if a.Type == datatypes.StringUnicode || a.Type == datatypes.StringASCII {
+					s = s.Push(datatypes.Data{Value: uint32(len(a.Value.(string))), Type: datatypes.Uint32})
 				} else {
-					panic("Value is not of type stringa or stringu!")
+					switch a.Type {
+					case datatypes.Int8, datatypes.Uint8:
+						s = s.Push(datatypes.Data{Value: uint32(8), Type: datatypes.Uint32})
+					case datatypes.Int16, datatypes.Uint16:
+						s = s.Push(datatypes.Data{Value: uint32(16), Type: datatypes.Uint32})
+					case datatypes.Int32, datatypes.Uint32, datatypes.Ptr, datatypes.Float32:
+						s = s.Push(datatypes.Data{Value: uint32(32), Type: datatypes.Uint32})
+					case datatypes.Int64, datatypes.Uint64, datatypes.Float64:
+						s = s.Push(datatypes.Data{Value: uint32(64), Type: datatypes.Uint32})
+					case datatypes.Bit:
+						s = s.Push(datatypes.Data{Value: uint32(1), Type: datatypes.Uint32})
+					default:
+						panic("Value is not of type stringa or stringu!")
+					}
 				}
 
 			case "getc":

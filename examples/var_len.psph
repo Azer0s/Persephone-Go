@@ -1,0 +1,16 @@
+v_uint8 a
+v_stringa b
+
+dcsa "hello"
+dcu8 254
+
+ldsac 0
+store b
+
+ldu8c 1
+store a
+
+len a
+len b
+syscall 0x10
+syscall 0x10

@@ -19,8 +19,8 @@ const (
 	Uint32 DataType = 0x321
 	Uint64 DataType = 0x641
 
-	Float32 DataType = 0x132
-	Float64 DataType = 0x164
+	Float32 DataType = 0x732
+	Float64 DataType = 0x764
 
 	StringASCII   DataType = 0x201
 	StringUnicode DataType = 0x202
