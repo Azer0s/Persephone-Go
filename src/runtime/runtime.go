@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"../compiler"
 	"../datatypes"
 	"../types"
 	"bufio"
@@ -577,6 +578,8 @@ func declareVar(command types.Command, d datatypes.DataType, v map[string]dataty
 	varAddress++
 
 	switch d {
+	case datatypes.Dynamic:
+		v[command.Param.Text] = datatypes.Data{Value: uint8(0), Type: datatypes.Uint8, Dynamic: true}
 	case datatypes.Bit:
 		v[command.Param.Text] = datatypes.Data{Value: false, Type: datatypes.Bit}
 	case datatypes.Ptr:
@@ -617,6 +620,11 @@ Load value on stack
 func loadVar(command types.Command, d datatypes.DataType, v map[string]datatypes.Data, s stack) stack {
 	name := getByPtr(command, v)
 	t := v[name].Type
+
+	if d == datatypes.Dynamic {
+		s = s.Push(v[name])
+		return s
+	}
 
 	//Load uint8 as string
 	if d >= datatypes.StringASCII && d <= datatypes.StringUnicode && t == datatypes.Uint8 {
@@ -773,6 +781,15 @@ func store(command types.Command, s stack, v map[string]datatypes.Data) (stack, 
 	d := v[name].Type
 	var t datatypes.Data
 	s, t = s.Pop()
+
+	if v[name].Dynamic {
+		v[name] = datatypes.Data{
+			Value:   t.Value,
+			Type:    t.Type,
+			Dynamic: true,
+		}
+		return s, v
+	}
 
 	//Store string as uint8
 	if d == datatypes.Uint8 && t.Type >= datatypes.StringASCII && t.Type <= datatypes.StringUnicode && len(t.Value.(string)) == 1 {
@@ -1000,7 +1017,7 @@ func Run(root types.Root) int8 {
 				}
 
 			/*
-				String functions
+				Var functions
 			*/
 			case "len":
 				a := v[getByPtr(root.Commands[e], v)]
@@ -1024,6 +1041,28 @@ func Run(root types.Root) int8 {
 					}
 				}
 
+			case "type":
+				a := v[getByPtr(root.Commands[e], v)]
+
+				if a.Type >= datatypes.Uint8 && a.Type <= datatypes.Uint64 {
+					s = s.Push(datatypes.Data{Value: compiler.Uint, Type: datatypes.Uint8})
+				} else if a.Type >= datatypes.Int8 && a.Type <= datatypes.Int64 {
+					s = s.Push(datatypes.Data{Value: compiler.Int, Type: datatypes.Uint8})
+				} else if a.Type >= datatypes.Float32 && a.Type <= datatypes.Float64 {
+					s = s.Push(datatypes.Data{Value: compiler.Float, Type: datatypes.Uint8})
+				} else if a.Type == datatypes.StringASCII {
+					s = s.Push(datatypes.Data{Value: compiler.StringA, Type: datatypes.Uint8})
+				} else if a.Type == datatypes.StringUnicode {
+					s = s.Push(datatypes.Data{Value: compiler.StringU, Type: datatypes.Uint8})
+				} else if a.Type == datatypes.Bit {
+					s = s.Push(datatypes.Data{Value: compiler.Bit, Type: datatypes.Uint8})
+				} else if a.Type == datatypes.Ptr {
+					s = s.Push(datatypes.Data{Value: compiler.Ptr, Type: datatypes.Uint8})
+				}
+
+			/*
+				String functions
+			*/
 			case "getc":
 				a1 := v[getByPtr(root.Commands[e], v)]
 				if a1.Type == datatypes.StringUnicode || a1.Type == datatypes.StringASCII {
@@ -1136,6 +1175,8 @@ func Run(root types.Root) int8 {
 			/*
 				Variable creation
 			*/
+			case "v_dyn":
+				v = declareVar(root.Commands[e], datatypes.Dynamic, v)
 			case "v_int8":
 				v = declareVar(root.Commands[e], datatypes.Int8, v)
 			case "v_int16":
@@ -1168,6 +1209,8 @@ func Run(root types.Root) int8 {
 			/*
 				Load variable onto stack
 			*/
+			case "lddynv":
+				s = loadVar(root.Commands[e], datatypes.Dynamic, v, s)
 			case "ldi8v":
 				s = loadVar(root.Commands[e], datatypes.Int8, v, s)
 			case "ldi16v":
