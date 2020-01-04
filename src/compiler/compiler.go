@@ -271,7 +271,6 @@ func Compile(root types.Root, outname string) int {
 
 			case types.HexNumber, types.Number:
 				if isUint {
-					isUint = false
 					write([]byte{Uint})
 					var num uint64
 					num, _ = strconv.ParseUint(root.Commands[e].Param.Text, 0, 64)

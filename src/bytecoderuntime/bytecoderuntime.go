@@ -65,7 +65,7 @@ func Run(bytes []byte) int8 {
 		opcode := getUint16FromBytes(code[e], code[e+1])
 		e += 2
 
-		parameter := false
+		var parameter bool
 
 		switch opcode {
 		case uint16(0x0003),

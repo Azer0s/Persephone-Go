@@ -31,8 +31,16 @@ func mainReturnWithCode() int {
 
 		stat, err := f.Stat()
 
+		if err != nil {
+			panic(err)
+		}
+
 		buf := make([]byte, stat.Size())
-		f.Read(buf)
+		_, err = f.Read(buf)
+
+		if err != nil {
+			panic(err)
+		}
 
 		return int(bytecoderuntime.Run(buf))
 	}
